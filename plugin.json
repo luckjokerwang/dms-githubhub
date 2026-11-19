@@ -2,7 +2,7 @@
   "id": "githubHubLocal",
   "name": "GitHub Hub",
   "description": "个人 GitHub 综合中心：经典顶栏 7 天绿条胶囊、28×28 正方形居中 8 周热力图与数据悬浮气泡，个人头像/昵称切换，与活跃 PR/Issue 追踪（支持一键转入 dcal 待办）。",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "luckjokerwang",
   "icon": "code",
   "type": "widget",

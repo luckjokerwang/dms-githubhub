@@ -19,6 +19,7 @@ PluginComponent {
     readonly property string contribScriptPath: Qt.resolvedUrl("./scripts/fetch-contributions.sh").toString().replace(/^file:\/\//, "")
     readonly property string ghScriptPath: Qt.resolvedUrl("./scripts/fetch-github-data.sh").toString().replace(/^file:\/\//, "")
     readonly property string dcalScriptPath: Qt.resolvedUrl("./scripts/add-to-dcal.sh").toString().replace(/^file:\/\//, "")
+    readonly property string notifyScriptPath: Qt.resolvedUrl("./scripts/notify.sh").toString().replace(/^file:\/\//, "")
     readonly property string localAvatarUrl: Qt.resolvedUrl("./assets/avatar.png").toString()
 
     // Settings
@@ -27,6 +28,9 @@ PluginComponent {
     property bool followThemeColor: (pluginData && pluginData.followThemeColor !== undefined)
                                    ? (pluginData.followThemeColor === true || pluginData.followThemeColor === "true")
                                    : false
+    property bool showDesktopNotifications: (pluginData && pluginData.showNotifications !== undefined)
+                                           ? (pluginData.showNotifications !== false && pluginData.showNotifications !== "false")
+                                           : true
 
     // Color palettes & Dynamic level-to-color mapping
     readonly property var classicPalette: ["#202329", "#0e4429", "#006d32", "#26a641", "#39d353"]
@@ -211,7 +215,7 @@ PluginComponent {
 
     function triggerManualRefresh() {
         root.isManualRefresh = true
-        ToastService.showInfo("GitHub Hub: 正在刷新验证 GitHub 连接...")
+        root.sendDesktopNotification("正在验证 GitHub 连接...", "正在向 GitHub 发送请求以测试网络可用性...", "low")
         root.refreshAll(true)
     }
 
@@ -238,11 +242,11 @@ PluginComponent {
             if (root.isManualRefresh) {
                 root.isManualRefresh = false
                 if (root.isError) {
-                    ToastService.showError("GitHub Hub: 连接失败 (" + (root.errorMessage || "网络超时或代理断开") + ")")
+                    root.sendDesktopNotification("GitHub Hub · 同步失败", "连接失败 (" + (root.errorMessage || "网络超时或代理断开") + ")", "critical")
                 } else {
                     const time = Qt.formatTime(new Date(), "hh:mm:ss")
                     root.lastSyncTimeStr = time
-                    ToastService.showInfo("GitHub Hub: 网络正常，数据已更新 (近8周共 " + root.totalContributions + " 次贡献)")
+                    root.sendDesktopNotification("GitHub Hub · 已同步", "网络连接正常，近 8 周累计 " + root.totalContributions + " 次贡献", "normal")
                 }
             } else if (!root.isError) {
                 root.lastSyncTimeStr = Qt.formatTime(new Date(), "hh:mm")
@@ -402,6 +406,24 @@ PluginComponent {
         dcalProcess.taskTitle = title
         dcalProcess.taskUrl = url
         dcalProcess.running = true
+    }
+
+    // Process 5: Desktop Notification (notify-send with user avatar)
+    Process {
+        id: notifyProcess
+        property string notifyTitle: ""
+        property string notifyMessage: ""
+        property string notifyUrgency: "normal"
+        command: [root.notifyScriptPath, notifyTitle, notifyMessage, notifyUrgency]
+        running: false
+    }
+
+    function sendDesktopNotification(title, message, urgency) {
+        if (!root.showDesktopNotifications) return
+        notifyProcess.notifyTitle = title
+        notifyProcess.notifyMessage = message
+        notifyProcess.notifyUrgency = urgency || "normal"
+        notifyProcess.running = true
     }
 
     // --- Horizontal Bar Pill (Classic 7-day Green Vertical Bars + Option B Amber Alert Dot) ---

@@ -29,11 +29,18 @@ PluginSettings {
         defaultValue: false
     }
 
+    PluginGlobalVar {
+        id: showNotificationsSetting
+        varName: "showNotifications"
+        defaultValue: true
+    }
+
     Component.onCompleted: {
         const savedUsername = PluginService.loadPluginData(root.pluginId, "username", "")
         const savedInterval = PluginService.loadPluginData(root.pluginId, "refreshInterval", 300)
         const savedNickname = PluginService.loadPluginData(root.pluginId, "showNickname", true)
         const savedFollowTheme = PluginService.loadPluginData(root.pluginId, "followThemeColor", false)
+        const savedNotify = PluginService.loadPluginData(root.pluginId, "showNotifications", true)
 
         if (savedUsername) {
             usernameField.text = savedUsername
@@ -45,6 +52,7 @@ PluginSettings {
 
         nicknameToggle.checked = (savedNickname !== false && savedNickname !== "false")
         followThemeToggle.checked = (savedFollowTheme === true || savedFollowTheme === "true")
+        notifyToggle.checked = (savedNotify !== false && savedNotify !== "false")
     }
 
     Column {
@@ -337,7 +345,7 @@ PluginSettings {
 
                 StyledText {
                     width: parent.width
-                    text: "• 全局快捷键：Mod + Alt + G（系统任意界面一键刷新并验证 GitHub 连通性）\n• 弹窗快捷键：F5 或 Ctrl + R（打开热力图弹窗时直接刷新）\n• 网络可用性反馈：刷新后右下角弹出 Toast 反馈（连接成功 vs 超时断连）"
+                    text: "• 全局快捷键：Mod + Alt + G（系统任意界面一键刷新并验证 GitHub 连通性）\n• 弹窗快捷键：F5 或 Ctrl + R（打开热力图弹窗时直接刷新）\n• 网络可用性反馈：刷新后在屏幕右上角弹出系统桌面通知（支持通知中心归档与随时回看）"
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceVariantText
                     wrapMode: Text.WordWrap
@@ -350,6 +358,63 @@ PluginSettings {
                     onClicked: {
                         Quickshell.execDetached(["dms", "ipc", "call", "githubHub", "refresh"])
                     }
+                }
+            }
+        }
+
+        // Desktop Notification Toggle
+        StyledRect {
+            width: parent.width
+            height: notifyRow.implicitHeight + Theme.spacingL * 2
+            color: Theme.surfaceContainerHigh
+            radius: Theme.cornerRadius
+
+            RowLayout {
+                id: notifyRow
+                anchors.fill: parent
+                anchors.margins: Theme.spacingL
+                spacing: Theme.spacingM
+
+                Rectangle {
+                    width: 36
+                    height: 36
+                    radius: 18
+                    color: notifyToggle.checked ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.15) : Theme.withAlpha(Theme.surfaceContainerHighest, 0.5)
+                    Layout.alignment: Qt.AlignVCenter
+                    Behavior on color { ColorAnimation { duration: 150 } }
+
+                    DankIcon {
+                        name: "notifications"
+                        size: 20
+                        color: notifyToggle.checked ? Theme.primary : Theme.surfaceVariantText
+                        anchors.centerIn: parent
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacingXXS
+
+                    StyledText {
+                        text: "发送系统桌面通知"
+                        font.bold: true
+                        font.pixelSize: Theme.fontSizeMedium
+                        color: Theme.surfaceText
+                    }
+
+                    StyledText {
+                        text: "数据刷新与快捷键验证时，在屏幕右上角弹出系统通知卡片（头像图标 + 自动归档至通知中心）。"
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.surfaceVariantText
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                }
+
+                DankToggle {
+                    id: notifyToggle
+                    checked: true
+                    onClicked: checked = !checked
                 }
             }
         }
@@ -368,10 +433,12 @@ PluginSettings {
                 PluginService.savePluginData(root.pluginId, "refreshInterval", interval)
                 PluginService.savePluginData(root.pluginId, "showNickname", nicknameToggle.checked)
                 PluginService.savePluginData(root.pluginId, "followThemeColor", followThemeToggle.checked)
+                PluginService.savePluginData(root.pluginId, "showNotifications", notifyToggle.checked)
 
                 PluginService.setGlobalVar(root.pluginId, "username", usernameField.text.trim())
                 PluginService.setGlobalVar(root.pluginId, "refreshInterval", interval)
                 PluginService.setGlobalVar(root.pluginId, "followThemeColor", followThemeToggle.checked)
+                PluginService.setGlobalVar(root.pluginId, "showNotifications", notifyToggle.checked)
 
                 ToastService.showInfo("GitHub Hub 设置已保存")
             }
