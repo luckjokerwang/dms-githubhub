@@ -1,0 +1,30 @@
+{
+  "id": "githubHub",
+  "name": "GitHub Hub",
+  "description": "个人 GitHub 综合中心：经典顶栏 7 天绿条胶囊、28×28 正方形居中 8 周热力图与数据悬浮气泡，个人头像/昵称切换，与活跃 PR/Issue 追踪（支持一键转入 dcal 待办）。",
+  "version": "1.0.0",
+  "author": "luckjokerwang",
+  "icon": "code",
+  "type": "widget",
+  "firstParty": false,
+  "component": "./GitHubHubWidget.qml",
+  "settings": "./GitHubHubSettings.qml",
+  "capabilities": [
+    "dankbar-widget"
+  ],
+  "requires_dms": ">=2.0.0",
+  "permissions": [
+    "settings_read",
+    "settings_write",
+    "process_read",
+    "process"
+  ],
+  "dependencies": [
+    "bash",
+    "curl",
+    "jq",
+    "gh",
+    "xdg-utils"
+  ],
+  "screenshot": "https://raw.githubusercontent.com/luckjokerwang/dms-githubhub/main/assets/screenshot.png"
+}
