@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
+import qs.DCommon.Widgets
 
 Rectangle {
     id: root
@@ -41,7 +42,7 @@ Rectangle {
                 anchors.centerIn: parent
                 spacing: 4
 
-                DankIcon {
+                DIcon {
                     name: "grid_view"
                     size: 14
                     color: root.activeTab === 0 ? Theme.primary : Theme.surfaceVariantText
@@ -82,7 +83,7 @@ Rectangle {
                 anchors.centerIn: parent
                 spacing: 4
 
-                DankIcon {
+                DIcon {
                     name: "call_merge"
                     size: 14
                     color: root.activeTab === 1 ? Theme.primary : Theme.surfaceVariantText
@@ -123,7 +124,7 @@ Rectangle {
                 anchors.centerIn: parent
                 spacing: 4
 
-                DankIcon {
+                DIcon {
                     name: "bug_report"
                     size: 14
                     color: root.activeTab === 2 ? Theme.primary : Theme.surfaceVariantText

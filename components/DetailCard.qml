@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
+import qs.DCommon.Widgets
 
 StyledRect {
     id: root
@@ -10,7 +11,7 @@ StyledRect {
     property string defaultWeekday: "Today"
     property string defaultDate: ""
     property int defaultCount: 0
-    property color defaultColor: "#202329"
+    property color defaultColor: Theme.surfaceContainerHigh
 
     readonly property int currentCount: selectedDay ? selectedDay.count : defaultCount
     readonly property string currentWeekday: selectedDay ? selectedDay.weekdayName : defaultWeekday
@@ -92,7 +93,7 @@ StyledRect {
             RowLayout {
                 spacing: Theme.spacingS
 
-                DankIcon {
+                DIcon {
                     name: "commit"
                     size: 16
                     color: Theme.primary
@@ -118,7 +119,7 @@ StyledRect {
                         id: todayBadgeText
                         anchors.centerIn: parent
                         text: "今日"
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.fontSizeSmall - 2
                         font.weight: Font.Bold
                         color: Theme.primary
                     }

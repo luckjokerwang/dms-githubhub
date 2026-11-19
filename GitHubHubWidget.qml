@@ -1,11 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import QtQuick.Controls
 import Quickshell.Io
 import qs.Common
 import qs.Services
 import qs.Widgets
 import qs.Modules.Plugins
+import qs.DCommon.Widgets
 import "./components"
 
 PluginComponent {
@@ -20,7 +22,6 @@ PluginComponent {
     readonly property string ghScriptPath: Qt.resolvedUrl("./scripts/fetch-github-data.sh").toString().replace(/^file:\/\//, "")
     readonly property string dcalScriptPath: Qt.resolvedUrl("./scripts/add-to-dcal.sh").toString().replace(/^file:\/\//, "")
     readonly property string notifyScriptPath: Qt.resolvedUrl("./scripts/notify.sh").toString().replace(/^file:\/\//, "")
-    readonly property string localAvatarUrl: Qt.resolvedUrl("./assets/avatar.png").toString()
 
     // Settings
     property string configuredUsername: (pluginData && pluginData.username) ? pluginData.username : ""
@@ -33,7 +34,7 @@ PluginComponent {
                                            : true
 
     // Color palettes & Dynamic level-to-color mapping
-    readonly property var classicPalette: ["#202329", "#0e4429", "#006d32", "#26a641", "#39d353"]
+    readonly property var classicPalette: ["", "#0e4429", "#006d32", "#26a641", "#39d353"]
 
     function colorToLevel(colorStr) {
         if (!colorStr) return 0
@@ -49,7 +50,7 @@ PluginComponent {
     function levelToColor(level) {
         const lvl = Math.max(0, Math.min(4, Math.round(level || 0)))
         if (lvl === 0) {
-            return root.classicPalette[0]
+            return Theme.surfaceContainerHigh
         }
         if (!root.followThemeColor) {
             return root.classicPalette[lvl]
@@ -58,10 +59,11 @@ PluginComponent {
         return Theme.withAlpha(Theme.primary, steps[lvl - 1])
     }
 
-    // State - User & Auth
+    // State - User & Auth (Zero hardcoded names, clean fallbacks)
     property bool isAuthenticated: false
-    property string effectiveUsername: configuredUsername ? configuredUsername : ((ghData && ghData.user && ghData.user.login) ? ghData.user.login : "luckjokerwang")
+    property string effectiveUsername: configuredUsername || (ghData && ghData.user && ghData.user.login) || ""
     property string avatarUrl: (ghData && ghData.user && ghData.user.avatar_url) ? ghData.user.avatar_url : ""
+    property string cachedAvatarPath: (ghData && ghData.user && ghData.user.avatar_cache) ? ghData.user.avatar_cache : ""
     property string displayName: (ghData && ghData.user && ghData.user.name) ? ghData.user.name : effectiveUsername
 
     // State - Heatmap (Raw & Mapped)
@@ -129,17 +131,18 @@ PluginComponent {
         function onSurfaceTextChanged() {
             if (root.followThemeColor) root.updateColors()
         }
+        function onSurfaceContainerHighChanged() {
+            root.updateColors()
+        }
     }
 
-    // State - GH Data (PRs, Issues, Notifications)
+    // State - GH Data (PRs, Issues)
     property var ghData: ({
         authenticated: false,
         user: null,
         prs: [],
         review_requested: [],
-        issues: [],
-        notifications: [],
-        unread_count: 0
+        issues: []
     })
 
     // Actionable urgent alerts (Option B: Review Requested PRs only)
@@ -158,10 +161,17 @@ PluginComponent {
     property var lastRefreshTime: null
     property bool isManualRefresh: false
     property string lastSyncTimeStr: ""
+    property string lastFetchedUser: ""
 
     Component.onCompleted: {
         initializePlaceholders()
-        refreshAll()
+        refreshAll(true)
+    }
+
+    onEffectiveUsernameChanged: {
+        if (effectiveUsername && effectiveUsername !== lastFetchedUser) {
+            fetchContributions(true)
+        }
     }
 
     onConfiguredUsernameChanged: {
@@ -186,7 +196,7 @@ PluginComponent {
                 formattedDate: "--/--",
                 count: 0,
                 level: 0,
-                color: "#202329"
+                color: Theme.surfaceContainerHigh
             })
         }
 
@@ -204,7 +214,7 @@ PluginComponent {
                     formattedDate: "--/--",
                     count: 0,
                     level: 0,
-                    color: "#202329"
+                    color: Theme.surfaceContainerHigh
                 })
             }
             gridPlaceholders.push(weekData)
@@ -219,6 +229,13 @@ PluginComponent {
         root.refreshAll(true)
     }
 
+    function fetchContributions(force) {
+        if (!effectiveUsername) return
+        lastFetchedUser = effectiveUsername
+        contribProcess.command = [root.contribScriptPath, root.effectiveUsername]
+        contribProcess.running = true
+    }
+
     function refreshAll(force) {
         const now = Date.now()
         if (!force && lastRefreshTime && (now - lastRefreshTime) < 10000) {
@@ -229,11 +246,13 @@ PluginComponent {
         isLoading = true
         isError = false
 
-        // 1. Fetch contributions
-        contribProcess.running = true
-
-        // 2. Fetch GH CLI data (user, PRs, Issues)
+        // 1. Fetch GH CLI data (user identity, PRs, Issues)
         ghProcess.running = true
+
+        // 2. Fetch contributions if effective username is already known
+        if (root.effectiveUsername) {
+            root.fetchContributions(force)
+        }
     }
 
     function checkProcessesDone() {
@@ -304,7 +323,7 @@ PluginComponent {
         }
     }
 
-    // Process 2: Fetch GH CLI Data (Avatar, PRs, Issues)
+    // Process 2: Fetch GH CLI Data (Identity, Avatar Cache, PRs, Issues)
     Process {
         id: ghProcess
         command: [root.ghScriptPath]
@@ -319,6 +338,14 @@ PluginComponent {
                     if (result.user && result.user.avatar_url) {
                         root.avatarUrl = result.user.avatar_url
                     }
+                    if (result.user && result.user.avatar_cache) {
+                        root.cachedAvatarPath = result.user.avatar_cache
+                    }
+
+                    // If user is detected and heatmap not yet fetched for this user, fetch now
+                    if (result.user && result.user.login && !root.configuredUsername && result.user.login !== root.lastFetchedUser) {
+                        root.fetchContributions(true)
+                    }
                 } catch (e) {
                     console.error("GitHubHub: Failed to parse GH data JSON:", e)
                 }
@@ -330,7 +357,7 @@ PluginComponent {
         }
     }
 
-    // IPC Endpoint: allows CLI & Global Keybinds via `dms ipc call githubHub <method>` or `githubHubLocal`
+    // IPC Endpoint: allows CLI & Global Keybinds via `dms ipc call githubHub <method>`
     IpcHandler {
         target: "githubHub"
 
@@ -382,13 +409,13 @@ PluginComponent {
     // Process 3: Browser Open Helper
     Process {
         id: openUrlProcess
-        property string targetUrl: "https://github.com/" + root.effectiveUsername
+        property string targetUrl: "https://github.com/" + (root.effectiveUsername || "")
         command: ["xdg-open", targetUrl]
         running: false
     }
 
     function openUrl(url) {
-        if (!url) url = "https://github.com/" + root.effectiveUsername
+        if (!url) url = "https://github.com/" + (root.effectiveUsername || "")
         openUrlProcess.targetUrl = url
         openUrlProcess.running = true
     }
@@ -408,7 +435,7 @@ PluginComponent {
         dcalProcess.running = true
     }
 
-    // Process 5: Desktop Notification (notify-send with user avatar)
+    // Process 5: Desktop Notification (DMS Native notification)
     Process {
         id: notifyProcess
         property string notifyTitle: ""
@@ -426,7 +453,7 @@ PluginComponent {
         notifyProcess.running = true
     }
 
-    // --- Horizontal Bar Pill (Classic 7-day Green Vertical Bars + Option B Amber Alert Dot) ---
+    // --- Horizontal Bar Pill (Classic 7-day Green Vertical Bars + Option B Static Alert Dot) ---
     horizontalBarPill: Component {
         Item {
             implicitWidth: pillRow.implicitWidth
@@ -446,7 +473,7 @@ PluginComponent {
                         radius: 2
                         color: (index < root.contributions.length && root.contributions[index].color)
                                ? root.contributions[index].color
-                               : "#202329"
+                               : Theme.surfaceContainerHigh
                         border.color: Qt.darker(color, 1.25)
                         border.width: 1
 
@@ -458,14 +485,14 @@ PluginComponent {
                 }
             }
 
-            // High-priority urgent alert breathing dot (Option B: Amber dot on Review / CI failed)
+            // High-priority urgent alert static dot (Option B: Theme.warning dot on Review Requested)
             Rectangle {
                 id: alertDot
                 visible: root.hasActionableAlert
                 width: 5
                 height: 5
                 radius: 2.5
-                color: "#FFA000" // Warm Amber
+                color: Theme.warning
                 border.color: Theme.surfaceContainerLowest
                 border.width: 1
                 anchors.top: pillRow.top
@@ -473,18 +500,11 @@ PluginComponent {
                 anchors.topMargin: -2
                 anchors.rightMargin: -2
                 z: 10
-
-                SequentialAnimation on opacity {
-                    running: alertDot.visible
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.35; duration: 1500; easing.type: Easing.InOutQuad }
-                    NumberAnimation { to: 1.0; duration: 1500; easing.type: Easing.InOutQuad }
-                }
             }
         }
     }
 
-    // --- Vertical Bar Pill (Classic 7-day Green Bars + Option B Amber Alert Dot) ---
+    // --- Vertical Bar Pill (Classic 7-day Green Bars + Option B Static Alert Dot) ---
     verticalBarPill: Component {
         Item {
             implicitWidth: pillCol.implicitWidth
@@ -504,7 +524,7 @@ PluginComponent {
                         radius: 2
                         color: (index < root.contributions.length && root.contributions[index].color)
                                ? root.contributions[index].color
-                               : "#202329"
+                               : Theme.surfaceContainerHigh
                         border.color: Qt.darker(color, 1.25)
                         border.width: 1
 
@@ -516,14 +536,14 @@ PluginComponent {
                 }
             }
 
-            // High-priority urgent alert breathing dot (Option B: Amber dot on Review / CI failed)
+            // High-priority urgent alert static dot (Option B: Theme.warning dot on Review Requested)
             Rectangle {
                 id: vAlertDot
                 visible: root.hasActionableAlert
                 width: 5
                 height: 5
                 radius: 2.5
-                color: "#FFA000"
+                color: Theme.warning
                 border.color: Theme.surfaceContainerLowest
                 border.width: 1
                 anchors.top: pillCol.top
@@ -531,13 +551,6 @@ PluginComponent {
                 anchors.topMargin: -2
                 anchors.rightMargin: -2
                 z: 10
-
-                SequentialAnimation on opacity {
-                    running: vAlertDot.visible
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.35; duration: 1500; easing.type: Easing.InOutQuad }
-                    NumberAnimation { to: 1.0; duration: 1500; easing.type: Easing.InOutQuad }
-                }
             }
         }
     }
@@ -567,7 +580,7 @@ PluginComponent {
                 // 1. Header Card (Avatar + User Info + Actions)
                 HeaderCard {
                     avatarUrl: root.avatarUrl
-                    localAvatarPath: root.localAvatarUrl
+                    cachedAvatarPath: root.cachedAvatarPath
                     username: root.effectiveUsername
                     displayName: root.displayName
                     statusText: root.isError
@@ -578,7 +591,14 @@ PluginComponent {
                     lastSyncTime: root.lastSyncTimeStr
 
                     onRefreshClicked: root.triggerManualRefresh()
-                    onOpenProfileClicked: root.openUrl("https://github.com/" + root.effectiveUsername)
+                    onOpenProfileClicked: {
+                        if (root.effectiveUsername) {
+                            root.openUrl("https://github.com/" + root.effectiveUsername)
+                        }
+                    }
+                    onOpenSettingsClicked: {
+                        PluginService.openPluginSettings("githubHub")
+                    }
                 }
 
                 // 2. Segmented Tab Bar (Hidden if not authenticated)
@@ -619,7 +639,7 @@ PluginComponent {
                             defaultWeekday: (root.todayItem && root.todayItem.weekdayName) ? root.todayItem.weekdayName : "今日"
                             defaultDate: (root.todayItem && root.todayItem.formattedDate) ? root.todayItem.formattedDate : "Today"
                             defaultCount: (root.todayItem && root.todayItem.count !== undefined) ? root.todayItem.count : 0
-                            defaultColor: (root.todayItem && root.todayItem.color) ? root.todayItem.color : "#202329"
+                            defaultColor: (root.todayItem && root.todayItem.color) ? root.todayItem.color : Theme.surfaceContainerHigh
                         }
                     }
 

@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
+import qs.DCommon.Widgets
 
 Item {
     id: root
@@ -27,7 +28,7 @@ Item {
             anchors.centerIn: parent
             spacing: Theme.spacingM
 
-            DankIcon {
+            DIcon {
                 Layout.alignment: Qt.AlignHCenter
                 name: "check_circle"
                 size: 36
@@ -44,8 +45,8 @@ Item {
         }
     }
 
-    // Issues List
-    ListView {
+    // Issues List using DListView
+    DListView {
         id: listView
         visible: root.issuesList && root.issuesList.length > 0
         anchors.fill: parent
@@ -82,11 +83,11 @@ Item {
                     color: Theme.surfaceContainerLowest
                     Layout.alignment: Qt.AlignVCenter
 
-                    DankIcon {
+                    DIcon {
                         anchors.centerIn: parent
                         name: "bug_report"
                         size: 16
-                        color: "#f59e0b"
+                        color: Theme.warning
                     }
                 }
 
@@ -128,7 +129,7 @@ Item {
                         radius: Theme.cornerRadius - 4
                         color: pinHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
 
-                        DankIcon {
+                        DIcon {
                             anchors.centerIn: parent
                             name: "push_pin"
                             size: 14
@@ -154,7 +155,7 @@ Item {
                         radius: Theme.cornerRadius - 4
                         color: openHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
 
-                        DankIcon {
+                        DIcon {
                             anchors.centerIn: parent
                             name: "open_in_new"
                             size: 14

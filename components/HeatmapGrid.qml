@@ -38,7 +38,7 @@ Item {
 
                 StyledText {
                     text: modelData
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fontSizeSmall - 2
                     color: Theme.surfaceVariantText
                     width: root.labelWidth
                     height: root.cellSize
@@ -71,7 +71,7 @@ Item {
                             height: root.cellSize
                             // Smooth rounded square
                             radius: root.selectedDay === modelData ? 6 : 4
-                            color: modelData.color || "#202329"
+                            color: modelData.color || Theme.surfaceContainerHigh
                             border.color: root.selectedDay === modelData ? Theme.primary : Qt.darker(color, 1.15)
                             border.width: root.selectedDay === modelData ? 2 : 1
                             opacity: root.isLoading ? 0.6 : 1.0
@@ -100,7 +100,7 @@ Item {
                                 }
                             }
 
-                            // Tooltip popup on hover (Original project style: "11/18: 1")
+                            // Tooltip popup on hover
                             Rectangle {
                                 id: tooltipBadge
                                 visible: cellMouseArea.containsMouse && modelData && modelData.date && modelData.date !== "--/--"
@@ -119,7 +119,7 @@ Item {
                                     id: tooltipText
                                     anchors.centerIn: parent
                                     text: (modelData.formattedDate || modelData.date) + ": " + (modelData.count !== undefined ? modelData.count : 0)
-                                    font.pixelSize: 11
+                                    font.pixelSize: Theme.fontSizeSmall - 1
                                     font.weight: Font.Medium
                                     color: Theme.surfaceText
                                 }

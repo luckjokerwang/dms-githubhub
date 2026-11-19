@@ -4,7 +4,8 @@ set -eo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "=== 1. Testing fetch-contributions.sh ==="
-res_contrib=$("$DIR/scripts/fetch-contributions.sh" luckjokerwang)
+test_user="${1:-torvalds}"
+res_contrib=$("$DIR/scripts/fetch-contributions.sh" "$test_user")
 echo "$res_contrib" | jq -e '.error == false and .total > 0 and (.contributions | length) == 7 and (.gridData | length) == 8' >/dev/null
 echo "✓ Heatmap data parsed successfully (7-day pill + 8-week grid)"
 

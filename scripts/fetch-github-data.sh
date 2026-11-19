@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Fetch GitHub user info, PRs, Issues, and Notifications using gh CLI
+# Fetch GitHub user info, PRs, and Issues using gh CLI
 set -eo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if ! command -v gh >/dev/null 2>&1; then
-    printf '{"authenticated":false,"reason":"gh_not_installed","user":null,"prs":[],"review_requested":[],"issues":[],"notifications":[],"unread_count":0}\n'
+    printf '{"authenticated":false,"reason":"gh_not_installed","user":null,"prs":[],"review_requested":[],"issues":[]}\n'
     exit 0
 fi
 
 if ! gh auth status >/dev/null 2>&1; then
-    printf '{"authenticated":false,"reason":"not_logged_in","user":null,"prs":[],"review_requested":[],"issues":[],"notifications":[],"unread_count":0}\n'
+    printf '{"authenticated":false,"reason":"not_logged_in","user":null,"prs":[],"review_requested":[],"issues":[]}\n'
     exit 0
 fi
 
@@ -29,30 +29,29 @@ trap 'rm -rf "$tmp_dir"' EXIT
 (
     timeout 6s gh search issues --involves=@me --state=open --limit=10 --json number,title,repository,url,createdAt 2>/dev/null > "$tmp_dir/issues.json" || echo '[]' > "$tmp_dir/issues.json"
 ) &
-(
-    timeout 6s gh api notifications 2>/dev/null > "$tmp_dir/notifications.json" || echo '[]' > "$tmp_dir/notifications.json"
-) &
 
 wait
 
-# Download avatar to assets cache in background if url exists
+# Cache avatar in XDG cache directory (never in the plugin repository directory)
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/dms-githubhub"
+mkdir -p "$cache_dir"
+avatar_cache="$cache_dir/avatar.png"
 avatar_url=$(jq -r '.avatar_url // ""' "$tmp_dir/user.json" 2>/dev/null || true)
 if [ -n "$avatar_url" ]; then
-    ( curl -s -m 5 "$avatar_url" -o "$DIR/../assets/avatar.png" 2>/dev/null || true ) &
+    ( curl -s -m 5 "$avatar_url" -o "$avatar_cache" 2>/dev/null || true ) &
 fi
 
 jq -c -n \
+  --arg avatar_cache "$avatar_cache" \
   --slurpfile user "$tmp_dir/user.json" \
   --slurpfile prs "$tmp_dir/prs.json" \
   --slurpfile reviews "$tmp_dir/reviews.json" \
   --slurpfile issues "$tmp_dir/issues.json" \
-  --slurpfile notifications "$tmp_dir/notifications.json" \
   '
     ($user[0] // {}) as $u |
     (if ($prs[0] | type) == "array" then $prs[0] else [] end) as $p |
     (if ($reviews[0] | type) == "array" then $reviews[0] else [] end) as $r |
     (if ($issues[0] | type) == "array" then $issues[0] else [] end) as $i |
-    (if ($notifications[0] | type) == "array" then $notifications[0] else [] end) as $n |
 
     # 1. Open Review Requested PRs
     [ $r[] | {
@@ -93,12 +92,12 @@ jq -c -n \
         login: ($u.login // ""),
         name: ($u.name // $u.login // ""),
         avatar_url: ($u.avatar_url // ""),
+        avatar_cache: $avatar_cache,
         public_repos: ($u.public_repos // 0),
         followers: ($u.followers // 0)
       },
       prs: $final_prs,
       review_requested: $rev_prs,
-      issues: $final_issues,
-      unread_count: ($n | length)
+      issues: $final_issues
     }
   '

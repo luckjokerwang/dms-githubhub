@@ -1,4 +1,4 @@
-# GitHub Hub (`githubHubLocal`) 项目开发指南
+# GitHub Hub (`githubHub`) 项目开发指南
 
 > 本项目是专为 Dux Shell (DMS 2.0+) 打造的个人 GitHub 信息中心插件。
 > 融合了原版 `githubHeatmap` 的经典 7 天竖条胶囊与网格美学，以及 Plus 版的用户头像与详情展示，同时深度整合系统已登录的 `gh` CLI。
@@ -14,7 +14,7 @@ rm -rf ~/.cache/DankMaterialShell ~/.cache/quickshell && dms restart
 
 ### 2. 插件热重载 (开发调试)
 ```bash
-dms ipc call plugins reload githubHubLocal
+dms ipc call plugins reload githubHub
 ```
 
 ### 3. 检查 GitHub CLI 登录态

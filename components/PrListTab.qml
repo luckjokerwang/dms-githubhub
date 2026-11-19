@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
+import qs.DCommon.Widgets
 
 Item {
     id: root
@@ -27,7 +28,7 @@ Item {
             anchors.centerIn: parent
             spacing: Theme.spacingM
 
-            DankIcon {
+            DIcon {
                 Layout.alignment: Qt.AlignHCenter
                 name: "check_circle"
                 size: 36
@@ -44,8 +45,8 @@ Item {
         }
     }
 
-    // PR List
-    ListView {
+    // PR List using DListView
+    DListView {
         id: listView
         visible: root.prsList && root.prsList.length > 0
         anchors.fill: parent
@@ -83,7 +84,7 @@ Item {
                     color: Theme.surfaceContainerLowest
                     Layout.alignment: Qt.AlignVCenter
 
-                    DankIcon {
+                    DIcon {
                         anchors.centerIn: parent
                         name: "call_merge"
                         size: 16
@@ -126,7 +127,7 @@ Item {
 
                                 StyledText {
                                     text: "待审核"
-                                    font.pixelSize: 9
+                                    font.pixelSize: Theme.fontSizeSmall - 2
                                     font.bold: true
                                     color: Theme.primary
                                     anchors.verticalCenter: parent.verticalCenter
@@ -159,7 +160,7 @@ Item {
                         radius: Theme.cornerRadius - 4
                         color: pinHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
 
-                        DankIcon {
+                        DIcon {
                             anchors.centerIn: parent
                             name: "push_pin"
                             size: 14
@@ -185,7 +186,7 @@ Item {
                         radius: Theme.cornerRadius - 4
                         color: openHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
 
-                        DankIcon {
+                        DIcon {
                             anchors.centerIn: parent
                             name: "open_in_new"
                             size: 14

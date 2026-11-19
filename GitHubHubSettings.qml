@@ -6,10 +6,11 @@ import qs.Common
 import qs.Widgets
 import qs.Modules.Plugins
 import qs.Services
+import qs.DCommon.Widgets
 
 PluginSettings {
     id: root
-    pluginId: "githubHubLocal"
+    pluginId: "githubHub"
 
     PluginGlobalVar {
         id: usernameSetting
@@ -104,7 +105,7 @@ PluginSettings {
                     }
 
                     StyledText {
-                        text: "开启显示个人昵称 (如 Wang)；关闭则显示 GitHub 用户名 (如 luckjokerwang)。弹窗内点击名字亦可随时切换。"
+                        text: "开启显示 GitHub 个人资料昵称；关闭则显示 GitHub 用户名。弹窗内点击名字亦可随时切换。"
                         font.pixelSize: Theme.fontSizeSmall
                         color: Theme.surfaceVariantText
                         Layout.fillWidth: true
@@ -112,7 +113,7 @@ PluginSettings {
                     }
                 }
 
-                DankToggle {
+                DToggle {
                     id: nicknameToggle
                     checked: true
                     onClicked: checked = !checked
@@ -136,31 +137,32 @@ PluginSettings {
                 RowLayout {
                     spacing: Theme.spacingS
 
-                    DankIcon {
+                    DIcon {
                         name: "person"
                         size: Theme.iconSize
                         color: Theme.primary
                     }
 
                     StyledText {
-                        text: "自定义 GitHub 用户名"
+                        text: "GitHub 用户名"
                         font.bold: true
                         font.pixelSize: Theme.fontSizeMedium
                         color: Theme.surfaceText
                     }
                 }
 
-                DankTextField {
-                    id: usernameField
-                    width: parent.width
-                    placeholderText: "留空则自动使用已登录的 gh 账号 (luckjokerwang)"
-                    text: ""
-                }
-
                 StyledText {
-                    text: "未登录 gh 时，插件将使用此用户名拉取公开热力图"
+                    width: parent.width
+                    text: "默认会自动检测系统中已登录的 GitHub CLI (gh) 账号。若未登录或需要查询任意指定用户的公开热力图，可在此处手动输入用户名。"
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceVariantText
+                    wrapMode: Text.WordWrap
+                }
+
+                DTextField {
+                    id: usernameField
+                    width: parent.width
+                    placeholderText: "留空则自动使用已登录的 gh 账号"
                 }
             }
         }
@@ -181,32 +183,32 @@ PluginSettings {
                 RowLayout {
                     spacing: Theme.spacingS
 
-                    DankIcon {
-                        name: "schedule"
+                    DIcon {
+                        name: "timer"
                         size: Theme.iconSize
                         color: Theme.primary
                     }
 
                     StyledText {
-                        text: "数据刷新间隔"
+                        text: "数据刷新间隔 (秒)"
                         font.bold: true
                         font.pixelSize: Theme.fontSizeMedium
                         color: Theme.surfaceText
                     }
                 }
 
-                DankTextField {
+                StyledText {
+                    width: parent.width
+                    text: "建议保持在 300 秒（5 分钟）以上，避免高频请求触发 GitHub API 速率限制（最低不小于 60 秒）。"
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.surfaceVariantText
+                    wrapMode: Text.WordWrap
+                }
+
+                DTextField {
                     id: intervalField
                     width: parent.width
                     placeholderText: "300"
-                    text: "300"
-                    validator: IntValidator { bottom: 60 }
-                }
-
-                StyledText {
-                    text: "后台自动拉取更新的间隔时间（秒，最低 60 秒）"
-                    font.pixelSize: Theme.fontSizeSmall
-                    color: Theme.surfaceVariantText
                 }
             }
         }
@@ -236,7 +238,7 @@ PluginSettings {
                         Layout.alignment: Qt.AlignVCenter
                         Behavior on color { ColorAnimation { duration: 150 } }
 
-                        DankIcon {
+                        DIcon {
                             name: "palette"
                             size: 20
                             color: followThemeToggle.checked ? Theme.primary : Theme.surfaceVariantText
@@ -264,7 +266,7 @@ PluginSettings {
                         }
                     }
 
-                    DankToggle {
+                    DToggle {
                         id: followThemeToggle
                         checked: false
                         onClicked: checked = !checked
@@ -289,23 +291,22 @@ PluginSettings {
                         Repeater {
                             model: 5
                             Rectangle {
-                                width: 36
-                                height: 20
+                                width: 28
+                                height: 28
                                 radius: 4
                                 color: {
+                                    if (modelData === 0) return Theme.surfaceContainerHighest
                                     if (followThemeToggle.checked) {
-                                        if (index === 0) return Theme.withAlpha(Theme.surfaceText, 0.08)
-                                        const steps = [0.28, 0.52, 0.76, 1.0]
-                                        return Theme.withAlpha(Theme.primary, steps[index - 1])
+                                        const steps = [0.30, 0.55, 0.80, 1.0]
+                                        return Theme.withAlpha(Theme.primary, steps[modelData - 1])
                                     } else {
-                                        const classic = ["#202329", "#0e4429", "#006d32", "#26a641", "#39d353"]
-                                        return classic[index]
+                                        const classic = ["", "#0e4429", "#006d32", "#26a641", "#39d353"]
+                                        return classic[modelData]
                                     }
                                 }
                                 border.color: Qt.darker(color, 1.2)
                                 border.width: 1
-
-                                Behavior on color { ColorAnimation { duration: 250 } }
+                                Behavior on color { ColorAnimation { duration: 150 } }
                             }
                         }
                     }
@@ -313,15 +314,15 @@ PluginSettings {
             }
         }
 
-        // Hotkey & Network Verification Guide
+        // Shortcut & Network Diagnostic Guidance
         StyledRect {
             width: parent.width
-            height: hotkeyCol.implicitHeight + Theme.spacingL * 2
+            height: shortcutCol.implicitHeight + Theme.spacingL * 2
             color: Theme.surfaceContainerHigh
             radius: Theme.cornerRadius
 
             Column {
-                id: hotkeyCol
+                id: shortcutCol
                 anchors.fill: parent
                 anchors.margins: Theme.spacingL
                 spacing: Theme.spacingM
@@ -329,7 +330,7 @@ PluginSettings {
                 RowLayout {
                     spacing: Theme.spacingS
 
-                    DankIcon {
+                    DIcon {
                         name: "keyboard"
                         size: Theme.iconSize
                         color: Theme.primary
@@ -351,7 +352,7 @@ PluginSettings {
                     wrapMode: Text.WordWrap
                 }
 
-                DankButton {
+                DButton {
                     width: parent.width
                     text: "立即测试刷新网络验证 (IPC)"
                     iconName: "network_check"
@@ -383,7 +384,7 @@ PluginSettings {
                     Layout.alignment: Qt.AlignVCenter
                     Behavior on color { ColorAnimation { duration: 150 } }
 
-                    DankIcon {
+                    DIcon {
                         name: "notifications"
                         size: 20
                         color: notifyToggle.checked ? Theme.primary : Theme.surfaceVariantText
@@ -411,7 +412,7 @@ PluginSettings {
                     }
                 }
 
-                DankToggle {
+                DToggle {
                     id: notifyToggle
                     checked: true
                     onClicked: checked = !checked
@@ -420,7 +421,7 @@ PluginSettings {
         }
 
         // Save Button
-        DankButton {
+        DButton {
             width: parent.width
             text: "保存配置"
             iconName: "check"

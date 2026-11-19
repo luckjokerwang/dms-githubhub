@@ -10,8 +10,19 @@ if [ -z "$SUMMARY" ]; then
     exit 1
 fi
 
+notify() {
+    local title="$1"
+    local msg="$2"
+    local urg="${3:-normal}"
+    if command -v dms >/dev/null 2>&1; then
+        dms notify -a "GitHub Hub" -u "$urg" -t 3000 "$title" "$msg"
+    elif command -v notify-send >/dev/null 2>&1; then
+        notify-send -a "GitHub Hub" -u "$urg" -t 3000 "$title" "$msg"
+    fi
+}
+
 if ! command -v dcal >/dev/null 2>&1; then
-    notify-send -u low "添加失败" "未找到 dcal 命令行工具"
+    notify "添加失败" "未找到 dcal 命令行工具" "low"
     exit 1
 fi
 
@@ -19,7 +30,7 @@ fi
 cal_id=$(dcal ipc calendars.list 2>/dev/null | jq -r '[.[] | select(.holdsTasks == true)][0].id // ""')
 
 if [ -z "$cal_id" ]; then
-    notify-send -u low "添加失败" "未找到支持任务的日历"
+    notify "添加失败" "未找到支持任务的日历" "low"
     exit 1
 fi
 
@@ -29,5 +40,5 @@ dcal ipc tasks.create \
   description="来源: $URL" \
   status="needs_action" >/dev/null 2>&1
 
-notify-send -t 3000 "已加入待办" "$SUMMARY"
+notify "已加入待办" "$SUMMARY" "normal"
 echo "ok"

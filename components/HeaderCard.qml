@@ -5,12 +5,13 @@ import Quickshell.Widgets
 import qs.Common
 import qs.Widgets
 import qs.Services
+import qs.DCommon.Widgets
 
 StyledRect {
     id: root
 
     property string avatarUrl: ""
-    property string localAvatarPath: ""
+    property string cachedAvatarPath: ""
     property string username: ""
     property string displayName: ""
     property string statusText: ""
@@ -21,9 +22,10 @@ StyledRect {
 
     signal refreshClicked()
     signal openProfileClicked()
+    signal openSettingsClicked()
 
     Component.onCompleted: {
-        const savedShowNickname = PluginService.loadPluginData("githubHubLocal", "showNickname", PluginService.loadPluginData("githubHub", "showNickname", true))
+        const savedShowNickname = PluginService.loadPluginData("githubHub", "showNickname", true)
         root.showNickname = (savedShowNickname !== false && savedShowNickname !== "false")
     }
 
@@ -60,15 +62,15 @@ StyledRect {
                 Image {
                     id: avatarImg
                     anchors.fill: parent
-                    source: root.localAvatarPath ? root.localAvatarPath : root.avatarUrl
+                    source: root.avatarUrl ? root.avatarUrl : (root.cachedAvatarPath ? ("file://" + root.cachedAvatarPath) : "")
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     cache: true
-                    visible: status === Image.Ready && (root.localAvatarPath !== "" || root.avatarUrl !== "")
+                    visible: status === Image.Ready && (root.avatarUrl !== "" || root.cachedAvatarPath !== "")
                 }
             }
 
-            // Fallback: Official GitHub Octocat icon
+            // Fallback: Official GitHub Octocat SVG icon
             Image {
                 anchors.centerIn: parent
                 width: 24
@@ -83,7 +85,13 @@ StyledRect {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.openProfileClicked()
+                onClicked: {
+                    if (root.username) {
+                        root.openProfileClicked()
+                    } else {
+                        root.openSettingsClicked()
+                    }
+                }
             }
         }
 
@@ -104,7 +112,12 @@ StyledRect {
 
                     StyledText {
                         id: nameLabel
-                        text: root.showNickname ? (root.displayName || root.username || "GitHub User") : (root.username || "GitHub User")
+                        text: {
+                            if (!root.username && !root.displayName) {
+                                return "未设置账号"
+                            }
+                            return root.showNickname ? (root.displayName || root.username) : root.username
+                        }
                         font.weight: Font.DemiBold
                         font.pixelSize: Theme.fontSizeMedium + 1
                         color: nameMouseArea.containsMouse ? Theme.primary : Theme.surfaceText
@@ -113,7 +126,8 @@ StyledRect {
                         Behavior on color { ColorAnimation { duration: 150 } }
                     }
 
-                    DankIcon {
+                    DIcon {
+                        visible: root.username !== ""
                         name: "swap_horiz"
                         size: 14
                         color: nameMouseArea.containsMouse ? Theme.primary : Theme.surfaceVariantText
@@ -130,8 +144,12 @@ StyledRect {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
+                        if (!root.username) {
+                            root.openSettingsClicked()
+                            return
+                        }
                         root.showNickname = !root.showNickname
-                        PluginService.savePluginData("githubHubLocal", "showNickname", root.showNickname)
+                        PluginService.savePluginData("githubHub", "showNickname", root.showNickname)
                     }
                 }
             }
@@ -140,12 +158,17 @@ StyledRect {
                 Layout.fillWidth: true
                 spacing: 6
 
-                // Network status indicator dot (Green = normal, Amber = loading, Red = error)
+                // Network status indicator dot (Primary = normal, Warning = loading, Error = error, outlineVariant = unconfigured)
                 Rectangle {
                     width: 7
                     height: 7
                     radius: 3.5
-                    color: root.isError ? "#EF5350" : (root.isLoading ? "#FFA000" : "#4CAF50")
+                    color: {
+                        if (root.isError) return Theme.error
+                        if (root.isLoading) return Theme.warning
+                        if (!root.username) return Theme.surfaceVariantText
+                        return Theme.primary
+                    }
                     border.width: 1
                     border.color: Qt.darker(color, 1.2)
                     Layout.alignment: Qt.AlignVCenter
@@ -155,9 +178,14 @@ StyledRect {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: root.statusText
+                    text: {
+                        if (!root.username && !root.isLoading && !root.isError) {
+                            return "点击配置用户名或登录 gh CLI"
+                        }
+                        return root.statusText
+                    }
                     font.pixelSize: Theme.fontSizeSmall - 1
-                    color: root.isError ? "#EF5350" : (root.isLoading ? Theme.primary : Theme.surfaceVariantText)
+                    color: root.isError ? Theme.error : (root.isLoading ? Theme.primary : Theme.surfaceVariantText)
                     elide: Text.ElideRight
                     wrapMode: Text.NoWrap
                     maximumLineCount: 1
@@ -187,7 +215,7 @@ StyledRect {
                 Behavior on border.color { ColorAnimation { duration: 150 } }
             }
 
-            DankIcon {
+            DIcon {
                 id: refreshIcon
                 name: "refresh"
                 size: 20
@@ -231,7 +259,7 @@ StyledRect {
                     id: tooltipText
                     anchors.centerIn: parent
                     text: "刷新验证 (F5 / Mod+Alt+G)"
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fontSizeSmall - 2
                     font.weight: Font.Medium
                     color: Theme.surfaceText
                 }
