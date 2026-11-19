@@ -1,7 +1,7 @@
 # 🐙 GitHub Hub
 
 [![DMS Plugin](https://img.shields.io/badge/DMS-Plugin-blue.svg)](https://github.com/AvengeMedia/DankMaterialShell)
-[![Version](https://img.shields.io/badge/Version-v1.0.0-brightgreen.svg)](https://github.com/luckjokerwang/dms-githubhub)
+[![Version](https://img.shields.io/badge/Version-v1.1.0-brightgreen.svg)](https://github.com/luckjokerwang/dms-githubhub)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Wayland-purple.svg)](https://github.com/luckjokerwang/dms-githubhub)
 
 专为 **DankMaterialShell (DMS 2.0+)** 打造的个人 GitHub 综合效率中心与贡献监控微件。
@@ -16,7 +16,31 @@
 - **Material 3 风格用户卡片**：展示 GitHub 真实头像与近 8 周累计贡献数，支持用户名与个人昵称随时切换。
 - **活跃 PR / Issue 追踪**：仅聚焦当前处于 `open` 状态的活跃拉取请求与议题，剔除陈旧历史干扰。
 - **一键转入 dcal 待办**：卡片支持一键将 PR/Issue 转化为 DankCalendar 本地任务清单，并支持浏览器快速打开。
+- **随系统主题色变动 (可选)**：热力图支持一键开启跟随 DMS 主题强调色（Material You 强调色），也可随时切回经典 GitHub 纯正绿阶。
+- **全局快捷键与网络连通性验证**：支持系统全局快捷键（`Mod+Alt+G`）与弹窗快捷键（`F5` / `Ctrl+R`）强制穿透防抖刷新，通过右下角桌面 Toast 即时反馈网络可用性与最新同步时间。
 - **零配置优雅降级**：无需配置 API Key，未登录时展示通用热力图，接入 `gh` CLI 自动解锁完整功能。
+
+---
+
+## ⌨️ 快捷键与 IPC 联动 (Shortcuts & IPC)
+
+### 1. IPC 接口清单
+
+| 目标 (Target) | 方法 (Function) | 说明 |
+| :--- | :--- | :--- |
+| `githubHub` | `refresh` | 强制异步重新拉取热力图与 GitHub 数据（并弹出网络连通性 Toast） |
+| `githubHub` | `toggle` | 呼出 / 收起 GitHub Hub 弹窗 |
+| `githubHub` | `open` | 展开弹窗 |
+| `githubHub` | `close` | 收起弹窗 |
+
+### 2. 快捷键配置
+
+- **全局快捷键 (Niri)**：`Mod + Alt + G` 一键刷新验证网络连通性
+- **弹窗内快捷键**：`F5` 或 `Ctrl + R` 刷新数据
+- **手动 CLI 调用**：
+  ```bash
+  dms ipc call githubHub refresh
+  ```
 
 ---
 

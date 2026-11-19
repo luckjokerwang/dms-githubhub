@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GitHub Heatmap Fetcher (Bash + Public API)
+# GitHub Heatmap Fetcher (GraphQL Official API + Public API Fallback)
 set -eo pipefail
 
 GITHUB_USERNAME="${1:-}"
@@ -9,7 +9,63 @@ if [ -z "$GITHUB_USERNAME" ]; then
     exit 0
 fi
 
-# GitHub contribution color scheme (dark theme)
+# ==============================================================================
+# Method 1: GitHub Official GraphQL API (High priority, 100% Real-time, Zero-Cache)
+# ==============================================================================
+if command -v gh >/dev/null 2>&1; then
+    query='query($userName:String!) {
+      user(login: $userName){
+        contributionsCollection {
+          contributionCalendar {
+            totalContributions
+            weeks {
+              contributionDays {
+                contributionCount
+                date
+                weekday
+                contributionLevel
+              }
+            }
+          }
+        }
+      }
+    }'
+
+    gh_res=$(timeout 6s gh api graphql -f query="$query" -f userName="$GITHUB_USERNAME" 2>/dev/null || echo "")
+
+    if [ -n "$gh_res" ] && echo "$gh_res" | jq -e ".data.user.contributionsCollection.contributionCalendar.weeks" >/dev/null 2>&1; then
+        echo "$gh_res" | jq -c '
+          ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] as $wnames |
+          def lvl_num: if . == "FIRST_QUARTILE" then 1 elif . == "SECOND_QUARTILE" then 2 elif . == "THIRD_QUARTILE" then 3 elif . == "FOURTH_QUARTILE" then 4 else 0 end;
+          def lvl_col: if . == 1 then "#0e4429" elif . == 2 then "#006d32" elif . == 3 then "#26a641" elif . == 4 then "#39d353" else "#202329" end;
+          
+          .data.user.contributionsCollection.contributionCalendar.weeks[-8:] |
+          map(
+            .contributionDays | map({
+              date: .date,
+              weekday: .weekday,
+              weekdayName: $wnames[.weekday],
+              formattedDate: (.date[5:7] + "/" + .date[8:10]),
+              count: .contributionCount,
+              level: (.contributionLevel | lvl_num),
+              color: ((.contributionLevel | lvl_num) | lvl_col)
+            })
+          ) as $grid |
+          ($grid | [.[][]]) as $all_days |
+          {
+            contributions: $all_days[-7:],
+            gridData: $grid,
+            total: ($all_days | map(.count) | add),
+            error: false
+          }
+        '
+        exit 0
+    fi
+fi
+
+# ==============================================================================
+# Method 2: Public API Fallback (jogruber.de, when not authenticated with gh)
+# ==============================================================================
 COLOR_0="#202329"
 COLOR_1="#0e4429"
 COLOR_2="#006d32"
@@ -73,7 +129,7 @@ while IFS= read -r day_json; do
         weekday_names=("Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat")
         weekday_name="${weekday_names[$weekday]}"
 
-        all_days+=("$date|$weekday|$count|$color|$formatted_date|$weekday_name")
+        all_days+=("$date|$weekday|$count|$color|$formatted_date|$weekday_name|$level")
     fi
 done <<< "$relevant_days"
 
@@ -91,7 +147,7 @@ first_week=1
 first_day_in_week=1
 
 for day_data in "${sorted_days[@]}"; do
-    IFS='|' read -r date weekday count color formatted_date weekday_name <<< "$day_data"
+    IFS='|' read -r date weekday count color formatted_date weekday_name level <<< "$day_data"
 
     if [ "$weekday" == "0" ] && [ "$first_day_in_week" == "0" ]; then
         current_week="$current_week]"
@@ -105,7 +161,7 @@ for day_data in "${sorted_days[@]}"; do
         first_day_in_week=1
     fi
 
-    day_obj="{\"date\":\"$date\",\"weekday\":$weekday,\"weekdayName\":\"$weekday_name\",\"formattedDate\":\"$formatted_date\",\"count\":$count,\"color\":\"$color\"}"
+    day_obj="{\"date\":\"$date\",\"weekday\":$weekday,\"weekdayName\":\"$weekday_name\",\"formattedDate\":\"$formatted_date\",\"count\":$count,\"color\":\"$color\",\"level\":${level:-0}}"
 
     if [ "$first_day_in_week" == "1" ]; then
         current_week="$current_week$day_obj"
@@ -133,12 +189,12 @@ pill_count=0
 
 for (( i=pill_start; i<day_count; i++ )); do
     day_data="${sorted_days[$i]}"
-    IFS='|' read -r date weekday count color formatted_date weekday_name <<< "$day_data"
+    IFS='|' read -r date weekday count color formatted_date weekday_name level <<< "$day_data"
 
     if [ $pill_count -gt 0 ]; then
         pill_json="$pill_json,"
     fi
-    pill_json="$pill_json{\"date\":\"$date\",\"weekday\":$weekday,\"weekdayName\":\"$weekday_name\",\"formattedDate\":\"$formatted_date\",\"count\":$count,\"color\":\"$color\"}"
+    pill_json="$pill_json{\"date\":\"$date\",\"weekday\":$weekday,\"weekdayName\":\"$weekday_name\",\"formattedDate\":\"$formatted_date\",\"count\":$count,\"color\":\"$color\",\"level\":${level:-0}}"
     pill_count=$((pill_count + 1))
 done
 pill_json="$pill_json]"

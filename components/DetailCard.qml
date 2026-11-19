@@ -104,6 +104,25 @@ StyledRect {
                     font.pixelSize: Theme.fontSizeMedium
                     color: Theme.surfaceText
                 }
+
+                Rectangle {
+                    visible: !root.selectedDay
+                    radius: 3
+                    color: Theme.withAlpha(Theme.primary, 0.15)
+                    border.width: 1
+                    border.color: Theme.withAlpha(Theme.primary, 0.3)
+                    implicitWidth: todayBadgeText.implicitWidth + 8
+                    implicitHeight: todayBadgeText.implicitHeight + 2
+
+                    StyledText {
+                        id: todayBadgeText
+                        anchors.centerIn: parent
+                        text: "今日"
+                        font.pixelSize: 10
+                        font.weight: Font.Bold
+                        color: Theme.primary
+                    }
+                }
             }
 
             StyledText {

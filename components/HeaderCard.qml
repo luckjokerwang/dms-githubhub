@@ -15,13 +15,15 @@ StyledRect {
     property string displayName: ""
     property string statusText: ""
     property bool isLoading: false
+    property bool isError: false
+    property string lastSyncTime: ""
     property bool showNickname: true
 
     signal refreshClicked()
     signal openProfileClicked()
 
     Component.onCompleted: {
-        const savedShowNickname = PluginService.loadPluginData("githubHub", "showNickname", true)
+        const savedShowNickname = PluginService.loadPluginData("githubHubLocal", "showNickname", PluginService.loadPluginData("githubHub", "showNickname", true))
         root.showNickname = (savedShowNickname !== false && savedShowNickname !== "false")
     }
 
@@ -103,7 +105,7 @@ StyledRect {
                     StyledText {
                         id: nameLabel
                         text: root.showNickname ? (root.displayName || root.username || "GitHub User") : (root.username || "GitHub User")
-                        font.bold: true
+                        font.weight: Font.DemiBold
                         font.pixelSize: Theme.fontSizeMedium + 1
                         color: nameMouseArea.containsMouse ? Theme.primary : Theme.surfaceText
                         elide: Text.ElideRight
@@ -129,106 +131,109 @@ StyledRect {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         root.showNickname = !root.showNickname
-                        PluginService.savePluginData("githubHub", "showNickname", root.showNickname)
+                        PluginService.savePluginData("githubHubLocal", "showNickname", root.showNickname)
                     }
                 }
             }
 
-            StyledText {
+            RowLayout {
                 Layout.fillWidth: true
-                text: root.statusText
-                font.pixelSize: Theme.fontSizeSmall - 1
-                color: root.isLoading ? Theme.primary : Theme.surfaceVariantText
-                elide: Text.ElideRight
+                spacing: 6
+
+                // Network status indicator dot (Green = normal, Amber = loading, Red = error)
+                Rectangle {
+                    width: 7
+                    height: 7
+                    radius: 3.5
+                    color: root.isError ? "#EF5350" : (root.isLoading ? "#FFA000" : "#4CAF50")
+                    border.width: 1
+                    border.color: Qt.darker(color, 1.2)
+                    Layout.alignment: Qt.AlignVCenter
+
+                    Behavior on color { ColorAnimation { duration: 200 } }
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: root.statusText
+                    font.pixelSize: Theme.fontSizeSmall - 1
+                    color: root.isError ? "#EF5350" : (root.isLoading ? Theme.primary : Theme.surfaceVariantText)
+                    elide: Text.ElideRight
+                    wrapMode: Text.NoWrap
+                    maximumLineCount: 1
+                }
             }
         }
 
-        // Action buttons row (Plus version refined rounded square design)
-        Row {
+        // Action button (Refresh button with tooltip)
+        Item {
             Layout.alignment: Qt.AlignVCenter
-            spacing: Theme.spacingS
+            width: 38
+            height: 38
+            scale: refreshArea.pressed ? 0.92 : (refreshArea.containsMouse ? 1.06 : 1.0)
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
-            // Refresh button (Rounded square, clean crisp SVG icon style)
-            Item {
-                width: 38
-                height: 38
-                scale: refreshArea.pressed ? 0.92 : (refreshArea.containsMouse ? 1.06 : 1.0)
-                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+            Rectangle {
+                anchors.fill: parent
+                radius: Theme.cornerRadius
+                color: refreshArea.pressed
+                       ? Theme.withAlpha(Theme.primary, 0.20)
+                       : (refreshArea.containsMouse ? Theme.withAlpha(Theme.primary, 0.12) : Theme.withAlpha(Theme.surfaceContainerHighest, 0.4))
+                border.width: 1
+                border.color: refreshArea.pressed
+                             ? Theme.withAlpha(Theme.primary, 0.6)
+                             : (refreshArea.containsMouse ? Theme.withAlpha(Theme.primary, 0.35) : Theme.withAlpha(Theme.outlineVariant, 0.2))
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on border.color { ColorAnimation { duration: 150 } }
+            }
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: Theme.cornerRadius
-                    color: refreshArea.pressed
-                           ? Theme.withAlpha(Theme.primary, 0.20)
-                           : (refreshArea.containsMouse ? Theme.withAlpha(Theme.primary, 0.12) : Theme.withAlpha(Theme.surfaceContainerHighest, 0.4))
-                    border.width: 1
-                    border.color: refreshArea.pressed
-                                 ? Theme.withAlpha(Theme.primary, 0.6)
-                                 : (refreshArea.containsMouse ? Theme.withAlpha(Theme.primary, 0.35) : Theme.withAlpha(Theme.outlineVariant, 0.2))
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on border.color { ColorAnimation { duration: 150 } }
-                }
+            DankIcon {
+                id: refreshIcon
+                name: "refresh"
+                size: 20
+                color: Theme.primary
+                anchors.centerIn: parent
 
-                DankIcon {
-                    id: refreshIcon
-                    name: "refresh"
-                    size: 20
-                    color: Theme.primary
-                    anchors.centerIn: parent
-
-                    NumberAnimation on rotation {
-                        from: 0
-                        to: 360
-                        duration: 1000
-                        loops: Animation.Infinite
-                        running: root.isLoading
-                    }
-                }
-
-                MouseArea {
-                    id: refreshArea
-                    anchors.fill: parent
-                    hoverEnabled: !root.isLoading
-                    enabled: !root.isLoading
-                    cursorShape: root.isLoading ? Qt.ArrowCursor : Qt.PointingHandCursor
-                    onClicked: root.refreshClicked()
+                NumberAnimation on rotation {
+                    from: 0
+                    to: 360
+                    duration: 1000
+                    loops: Animation.Infinite
+                    running: root.isLoading
                 }
             }
 
-            // Open in browser button (matching rounded square design)
-            Item {
-                width: 38
-                height: 38
-                scale: openArea.pressed ? 0.92 : (openArea.containsMouse ? 1.06 : 1.0)
-                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+            MouseArea {
+                id: refreshArea
+                anchors.fill: parent
+                hoverEnabled: !root.isLoading
+                enabled: !root.isLoading
+                cursorShape: root.isLoading ? Qt.ArrowCursor : Qt.PointingHandCursor
+                onClicked: root.refreshClicked()
+            }
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: Theme.cornerRadius
-                    color: openArea.pressed
-                           ? Theme.withAlpha(Theme.primary, 0.20)
-                           : (openArea.containsMouse ? Theme.withAlpha(Theme.primary, 0.12) : Theme.withAlpha(Theme.surfaceContainerHighest, 0.4))
-                    border.width: 1
-                    border.color: openArea.pressed
-                                 ? Theme.withAlpha(Theme.primary, 0.6)
-                                 : (openArea.containsMouse ? Theme.withAlpha(Theme.primary, 0.35) : Theme.withAlpha(Theme.outlineVariant, 0.2))
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on border.color { ColorAnimation { duration: 150 } }
-                }
+            // Refresh tooltip hint
+            Rectangle {
+                id: refreshTooltip
+                visible: refreshArea.containsMouse && !root.isLoading
+                z: 999
+                anchors.bottom: parent.top
+                anchors.bottomMargin: 6
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: tooltipText.implicitWidth + 12
+                height: tooltipText.implicitHeight + 6
+                color: Theme.surfaceContainerHighest
+                border.color: Theme.withAlpha(Theme.outlineVariant, 0.4)
+                border.width: 1
+                radius: 4
 
-                DankIcon {
+                StyledText {
+                    id: tooltipText
                     anchors.centerIn: parent
-                    name: "open_in_browser"
-                    size: 20
-                    color: Theme.primary
-                }
-
-                MouseArea {
-                    id: openArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.openProfileClicked()
+                    text: "刷新验证 (F5 / Mod+Alt+G)"
+                    font.pixelSize: 10
+                    font.weight: Font.Medium
+                    color: Theme.surfaceText
                 }
             }
         }
