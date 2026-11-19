@@ -12,7 +12,6 @@ Item {
     property bool isLoading: false
 
     signal openUrlClicked(string url)
-    signal addToDcalClicked(string title, string url)
 
     implicitWidth: parent.width
     implicitHeight: parent.height
@@ -148,58 +147,27 @@ Item {
                     }
                 }
 
-                // Action buttons (hover)
-                Row {
+                // Open in browser button
+                Rectangle {
                     Layout.alignment: Qt.AlignVCenter
-                    spacing: 4
+                    width: 28
+                    height: 28
+                    radius: Theme.cornerRadius - 4
+                    color: openHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
 
-                    // Add to dcal task button
-                    Rectangle {
-                        width: 28
-                        height: 28
-                        radius: Theme.cornerRadius - 4
-                        color: pinHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
-
-                        DIcon {
-                            anchors.centerIn: parent
-                            name: "push_pin"
-                            size: 14
-                            color: pinHover.containsMouse ? Theme.primary : Theme.surfaceVariantText
-                        }
-
-                        MouseArea {
-                            id: pinHover
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                const title = "[PR] " + (prItem.modelData.repo || "") + "#" + (prItem.modelData.number || "") + ": " + (prItem.modelData.title || "")
-                                root.addToDcalClicked(title, prItem.modelData.url || "")
-                            }
-                        }
+                    DIcon {
+                        anchors.centerIn: parent
+                        name: "open_in_new"
+                        size: 14
+                        color: openHover.containsMouse ? Theme.primary : Theme.surfaceVariantText
                     }
 
-                    // Open in browser button
-                    Rectangle {
-                        width: 28
-                        height: 28
-                        radius: Theme.cornerRadius - 4
-                        color: openHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
-
-                        DIcon {
-                            anchors.centerIn: parent
-                            name: "open_in_new"
-                            size: 14
-                            color: openHover.containsMouse ? Theme.primary : Theme.surfaceVariantText
-                        }
-
-                        MouseArea {
-                            id: openHover
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.openUrlClicked(prItem.modelData.url || "")
-                        }
+                    MouseArea {
+                        id: openHover
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.openUrlClicked(prItem.modelData.url || "")
                     }
                 }
             }

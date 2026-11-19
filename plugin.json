@@ -1,7 +1,7 @@
 {
   "id": "githubHub",
   "name": "GitHub Hub",
-  "description": "个人 GitHub 综合效率中心：经典顶栏 7 天条形胶囊、28×28 正方形居中 8 周热力图与数据悬浮提示，个人头像与昵称切换，以及活跃 PR/Issue 追踪（支持一键转入 dcal 待办）。未登录 gh CLI 时自动降级使用第三方 github-contributions-api.jogruber.de 公开接口拉取贡献数据。",
+  "description": "个人 GitHub 综合效率中心：经典顶栏 7 天条形胶囊、28×28 正方形居中 8 周热力图与数据悬浮提示，个人头像与昵称切换，以及活跃 PR/Issue 追踪。未登录 gh CLI 时自动降级使用第三方 github-contributions-api.jogruber.de 公开接口拉取贡献数据。",
   "version": "1.1.2",
   "author": "luckjokerwang",
   "icon": "code",
@@ -24,8 +24,7 @@
     "curl",
     "jq",
     "gh",
-    "xdg-utils",
-    "dcal"
+    "xdg-utils"
   ],
   "screenshot": "https://raw.githubusercontent.com/luckjokerwang/dms-githubhub/main/assets/screenshot.png"
 }

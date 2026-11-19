@@ -20,7 +20,6 @@ PluginComponent {
     // Script paths
     readonly property string contribScriptPath: Qt.resolvedUrl("./scripts/fetch-contributions.sh").toString().replace(/^file:\/\//, "")
     readonly property string ghScriptPath: Qt.resolvedUrl("./scripts/fetch-github-data.sh").toString().replace(/^file:\/\//, "")
-    readonly property string dcalScriptPath: Qt.resolvedUrl("./scripts/add-to-dcal.sh").toString().replace(/^file:\/\//, "")
     readonly property string notifyScriptPath: Qt.resolvedUrl("./scripts/notify.sh").toString().replace(/^file:\/\//, "")
 
     // Settings
@@ -420,22 +419,7 @@ PluginComponent {
         openUrlProcess.running = true
     }
 
-    // Process 4: Add to dcal tasks
-    Process {
-        id: dcalProcess
-        property string taskTitle: ""
-        property string taskUrl: ""
-        command: [root.dcalScriptPath, taskTitle, taskUrl]
-        running: false
-    }
-
-    function addToDcal(title, url) {
-        dcalProcess.taskTitle = title
-        dcalProcess.taskUrl = url
-        dcalProcess.running = true
-    }
-
-    // Process 5: Desktop Notification (DMS Native notification)
+    // Process 4: Desktop Notification (DMS Native notification)
     Process {
         id: notifyProcess
         property string notifyTitle: ""
@@ -649,7 +633,6 @@ PluginComponent {
                         prsList: (root.ghData && root.ghData.prs) ? root.ghData.prs : []
                         isLoading: root.isLoading
                         onOpenUrlClicked: url => root.openUrl(url)
-                        onAddToDcalClicked: (title, url) => root.addToDcal(title, url)
                     }
 
                     // === Tab 2: Issues List ===
@@ -658,7 +641,6 @@ PluginComponent {
                         issuesList: (root.ghData && root.ghData.issues) ? root.ghData.issues : []
                         isLoading: root.isLoading
                         onOpenUrlClicked: url => root.openUrl(url)
-                        onAddToDcalClicked: (title, url) => root.addToDcal(title, url)
                     }
                 }
             }
