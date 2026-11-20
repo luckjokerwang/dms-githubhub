@@ -1,7 +1,7 @@
 # 🐙 GitHub Hub
 
 [![DMS Plugin](https://img.shields.io/badge/DMS-Plugin-blue.svg)](https://github.com/AvengeMedia/DankMaterialShell)
-[![Version](https://img.shields.io/badge/Version-v1.1.3-brightgreen.svg)](https://github.com/luckjokerwang/dms-githubhub)
+[![Version](https://img.shields.io/badge/Version-v1.1.4-brightgreen.svg)](https://github.com/luckjokerwang/dms-githubhub)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Wayland-purple.svg)](https://github.com/luckjokerwang/dms-githubhub)
 
 专为 **DankMaterialShell (DMS 2.0+)** 打造的个人 GitHub 综合效率中心与贡献监控微件。
@@ -16,7 +16,7 @@
 - **Material 3 风格用户卡片**：展示 GitHub 真实头像与近 8 周累计贡献数，支持用户名与个人昵称随时切换。
 - **活跃 PR / Issue 追踪**：仅聚焦当前处于 `open` 状态的活跃拉取请求与议题，剔除陈旧历史干扰。
 - **浏览器一键速达**：卡片支持一键打开对应 PR/Issue 网页，随时跟进最新动态。
-- **随系统主题色变动**：热力图原生集成 Material You 设计语言，自适应 DMS 桌面主题强调色。
+- **经典绿阶与随系统主题色变动**：默认采用 GitHub 标志性原生经典绿阶（自适应深浅色模式），亦可在设置中开启跟随 DMS 桌面主题强调色（Material You 强调色）。
 - **弹窗快捷键与网络连通性验证**：支持弹窗内快捷键（`F5` / `Ctrl+R`）强制穿透防抖刷新，通过桌面通知即时反馈网络可用性与最新同步时间。
 - **零配置优雅降级**：无需配置 API Key，未登录时展示通用热力图，接入 `gh` CLI 自动解锁完整功能。
 

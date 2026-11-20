@@ -26,6 +26,9 @@ PluginSettings {
 
         nicknameToggle.checked = (savedNickname !== false && savedNickname !== "false")
         notifyToggle.checked = (savedNotify !== false && savedNotify !== "false")
+
+        const savedThemeColor = PluginService.loadPluginData(root.pluginId, "useThemeColor", false)
+        themeColorToggle.checked = (savedThemeColor === true || savedThemeColor === "true")
     }
 
     Column {
@@ -226,6 +229,47 @@ PluginSettings {
             }
         }
 
+        // Theme Color Toggle
+        StyledRect {
+            width: parent.width
+            height: themeColorRow.implicitHeight + Theme.spacingL * 2
+            color: Theme.surfaceContainerHigh
+            radius: Theme.cornerRadius
+
+            RowLayout {
+                id: themeColorRow
+                anchors.fill: parent
+                anchors.margins: Theme.spacingL
+                spacing: Theme.spacingM
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.spacingXXS
+
+                    StyledText {
+                        text: I18n.tr("Match Desktop Theme Color")
+                        font.bold: true
+                        font.pixelSize: Theme.fontSizeMedium
+                        color: Theme.surfaceText
+                    }
+
+                    StyledText {
+                        text: I18n.tr("Adapt heatmap colors to the system theme instead of classic GitHub green.")
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.surfaceVariantText
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                }
+
+                DToggle {
+                    id: themeColorToggle
+                    checked: false
+                    onClicked: checked = !checked
+                }
+            }
+        }
+
         // Shortcut & Diagnostic Guidance
         StyledRect {
             width: parent.width
@@ -289,6 +333,7 @@ PluginSettings {
                 PluginService.savePluginData(root.pluginId, "refreshInterval", interval)
                 PluginService.savePluginData(root.pluginId, "showNickname", nicknameToggle.checked)
                 PluginService.savePluginData(root.pluginId, "showNotifications", notifyToggle.checked)
+                PluginService.savePluginData(root.pluginId, "useThemeColor", themeColorToggle.checked)
 
                 ToastService.showInfo(I18n.tr("GitHub Hub settings saved"))
             }

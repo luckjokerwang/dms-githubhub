@@ -27,14 +27,28 @@ PluginComponent {
     property bool showDesktopNotifications: (pluginData && pluginData.showNotifications !== undefined)
                                            ? (pluginData.showNotifications !== false && pluginData.showNotifications !== "false")
                                            : true
+    property bool useThemeColor: (pluginData && pluginData.useThemeColor !== undefined)
+                                ? (pluginData.useThemeColor === true || pluginData.useThemeColor === "true")
+                                : false
+
+    readonly property bool isDarkTheme: (Theme.surface.r * 0.299 + Theme.surface.g * 0.587 + Theme.surface.b * 0.114) < 0.5
+    readonly property var classicGreenDark: ["#0e4429", "#006d32", "#26a641", "#39d353"]
+    readonly property var classicGreenLight: ["#9be9a8", "#40c463", "#30a14e", "#216e39"]
+
+    onUseThemeColorChanged: updateColors()
+    onIsDarkThemeChanged: updateColors()
 
     function levelToColor(level) {
         const lvl = Math.max(0, Math.min(4, Math.round(level || 0)))
         if (lvl === 0) {
             return Theme.surfaceContainerHigh
         }
-        const steps = [0.30, 0.55, 0.80, 1.0]
-        return Theme.withAlpha(Theme.primary, steps[lvl - 1])
+        if (root.useThemeColor) {
+            const steps = [0.30, 0.55, 0.80, 1.0]
+            return Theme.withAlpha(Theme.primary, steps[lvl - 1])
+        }
+        const palette = root.isDarkTheme ? root.classicGreenDark : root.classicGreenLight
+        return palette[lvl - 1]
     }
 
     property bool isAuthenticated: false
@@ -400,7 +414,7 @@ PluginComponent {
                     Rectangle {
                         width: Theme.spacingS
                         height: Theme.iconSizeSmall
-                        radius: Theme.cornerRadiusXS
+                        radius: 2
                         color: (index < root.contributions.length && root.contributions[index].color)
                                ? root.contributions[index].color
                                : Theme.surfaceContainerHigh
@@ -450,7 +464,7 @@ PluginComponent {
                     Rectangle {
                         width: Theme.iconSizeSmall
                         height: Theme.spacingS
-                        radius: Theme.cornerRadiusXS
+                        radius: 2
                         color: (index < root.contributions.length && root.contributions[index].color)
                                ? root.contributions[index].color
                                : Theme.surfaceContainerHigh

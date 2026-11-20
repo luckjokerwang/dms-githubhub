@@ -70,7 +70,7 @@ Item {
                             id: cellRect
                             width: root.cellSize
                             height: root.cellSize
-                            radius: root.selectedDay === modelData ? Theme.cornerRadius : (Theme.cornerRadius / 2)
+                            radius: root.selectedDay === modelData ? 5 : 3
                             color: modelData.color || Theme.surfaceContainerHigh
                             border.color: root.selectedDay === modelData ? Theme.primary : Qt.darker(color, 1.15)
                             border.width: root.selectedDay === modelData ? 2 : 1
