@@ -57,7 +57,7 @@ Item {
             id: prItem
             width: listView.width
             // Adaptive height based on text lines, with defensive clipping
-            height: Math.max(64, itemRowLayout.implicitHeight + Theme.spacingL)
+            height: Math.max(Theme.iconSizeLarge * 2, itemRowLayout.implicitHeight + Theme.spacingL)
             radius: Theme.cornerRadius - Theme.spacingXXS
             color: itemHover.containsMouse ? Theme.surfaceContainer : Theme.withAlpha(Theme.surfaceContainerLow, 0.9)
             border.width: (prItem.modelData && prItem.modelData.isReviewRequested) ? 1 : 0

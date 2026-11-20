@@ -80,7 +80,9 @@ jq -c '
   if ($all | length) == 0 then
     {contributions: [], gridData: [], total: 0, error: true, errorMessage: "No contribution data found"}
   else
-    ($all[-56:] | map(
+    ($all[-1].date | strptime("%Y-%m-%d") | strftime("%w") | tonumber) as $last_w |
+    (49 + $last_w + 1) as $total_count |
+    ($all[-$total_count:] | map(
       (.date | strptime("%Y-%m-%d")) as $tm |
       ($tm | strftime("%w") | tonumber) as $w |
       {
@@ -92,7 +94,7 @@ jq -c '
         level: (if .level >= 0 and .level <= 4 then .level else 0 end)
       }
     )) as $days |
-    [range(0; $days | length; 7) as $i | $days[$i:$i+7]] as $grid |
+    ([range(0; 49; 7) as $i | $days[$i:$i+7]] + (if ($days | length) > 49 then [$days[49:]] else [] end)) as $grid |
     {
       contributions: $days[-7:],
       gridData: $grid,

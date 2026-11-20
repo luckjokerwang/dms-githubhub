@@ -20,11 +20,9 @@ PluginSettings {
 
         if (savedUsername) {
             usernameField.text = savedUsername
-            PluginService.setGlobalVar(root.pluginId, "username", savedUsername)
         }
 
         intervalField.text = savedInterval.toString()
-        PluginService.setGlobalVar(root.pluginId, "refreshInterval", savedInterval)
 
         nicknameToggle.checked = (savedNickname !== false && savedNickname !== "false")
         notifyToggle.checked = (savedNotify !== false && savedNotify !== "false")
@@ -291,10 +289,6 @@ PluginSettings {
                 PluginService.savePluginData(root.pluginId, "refreshInterval", interval)
                 PluginService.savePluginData(root.pluginId, "showNickname", nicknameToggle.checked)
                 PluginService.savePluginData(root.pluginId, "showNotifications", notifyToggle.checked)
-
-                PluginService.setGlobalVar(root.pluginId, "username", usernameField.text.trim())
-                PluginService.setGlobalVar(root.pluginId, "refreshInterval", interval)
-                PluginService.setGlobalVar(root.pluginId, "showNotifications", notifyToggle.checked)
 
                 ToastService.showInfo(I18n.tr("GitHub Hub settings saved"))
             }

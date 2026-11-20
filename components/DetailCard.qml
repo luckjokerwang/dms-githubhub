@@ -40,18 +40,18 @@ StyledRect {
 
         // Count display column (left)
         Column {
-            Layout.preferredWidth: 88
+            Layout.preferredWidth: Theme.spacingXL * 3
             Layout.alignment: Qt.AlignVCenter
-            spacing: 2
+            spacing: Theme.spacingXXS
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 6
+                spacing: Theme.spacingS
 
                 Rectangle {
-                    width: 10
-                    height: 10
-                    radius: 3
+                    width: Theme.spacingM
+                    height: Theme.spacingM
+                    radius: Theme.cornerRadiusXS
                     anchors.verticalCenter: parent.verticalCenter
                     color: root.currentColor
                     border.color: Qt.darker(color, 1.2)
@@ -81,7 +81,7 @@ StyledRect {
         // Vertical divider
         Rectangle {
             Layout.preferredWidth: 1
-            Layout.preferredHeight: 38
+            Layout.preferredHeight: Theme.iconSizeLarge + Theme.spacingS
             Layout.alignment: Qt.AlignVCenter
             color: Theme.withAlpha(Theme.outlineVariant, 0.3)
         }
@@ -90,7 +90,7 @@ StyledRect {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 2
+            spacing: Theme.spacingXXS
 
             RowLayout {
                 spacing: Theme.spacingS
