@@ -154,9 +154,9 @@ StyledRect {
 
                 // Network status indicator dot
                 Rectangle {
-                    width: Theme.spacingM
-                    height: Theme.spacingM
-                    radius: Theme.spacingM / 2
+                    width: 7
+                    height: 7
+                    radius: 3.5
                     color: {
                         if (root.isError) return Theme.error
                         if (root.isLoading) return Theme.warning

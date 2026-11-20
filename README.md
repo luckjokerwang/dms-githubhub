@@ -1,7 +1,7 @@
 # 🐙 GitHub Hub
 
 [![DMS Plugin](https://img.shields.io/badge/DMS-Plugin-blue.svg)](https://github.com/AvengeMedia/DankMaterialShell)
-[![Version](https://img.shields.io/badge/Version-v1.1.4-brightgreen.svg)](https://github.com/luckjokerwang/dms-githubhub)
+[![Version](https://img.shields.io/badge/Version-v1.1.5-brightgreen.svg)](https://github.com/luckjokerwang/dms-githubhub)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Wayland-purple.svg)](https://github.com/luckjokerwang/dms-githubhub)
 
 专为 **DankMaterialShell (DMS 2.0+)** 打造的个人 GitHub 综合效率中心与贡献监控微件。

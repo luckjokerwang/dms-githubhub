@@ -100,10 +100,28 @@ Item {
                                 }
                             }
 
-                            DTooltipHost {
-                                text: (modelData.formattedDate || modelData.date) + ": " + (modelData.count !== undefined ? modelData.count : 0)
-                                target: cellRect
-                                hoverArea: cellMouseArea
+                            Rectangle {
+                                id: tooltipBadge
+                                visible: cellMouseArea.containsMouse && modelData && modelData.date && modelData.date !== "--/--"
+                                z: 999
+                                anchors.bottom: parent.top
+                                anchors.bottomMargin: Theme.spacingXS
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: tooltipText.implicitWidth + Theme.spacingM
+                                height: tooltipText.implicitHeight + Theme.spacingS
+                                color: Theme.surfaceContainerHighest
+                                border.color: Theme.withAlpha(Theme.outlineVariant, 0.4)
+                                border.width: 1
+                                radius: Theme.cornerRadiusXS
+
+                                StyledText {
+                                    id: tooltipText
+                                    anchors.centerIn: parent
+                                    text: (modelData.formattedDate || modelData.date) + ": " + (modelData.count !== undefined ? modelData.count : 0)
+                                    font.pixelSize: Theme.fontSizeSmall - 1
+                                    font.weight: Font.Medium
+                                    color: Theme.surfaceText
+                                }
                             }
                         }
                     }

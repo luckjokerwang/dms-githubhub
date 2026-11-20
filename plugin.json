@@ -2,7 +2,7 @@
   "id": "githubHub",
   "name": "GitHub Hub",
   "description": "Comprehensive personal GitHub center: classic 7-day bar pill, square 8-week heatmap with hover tooltips, user profile & real-time PR/Issue tracker. When unauthenticated, contribution data falls back to the third-party github-contributions-api.jogruber.de public API.",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "author": "luckjokerwang",
   "icon": "code",
   "type": "widget",

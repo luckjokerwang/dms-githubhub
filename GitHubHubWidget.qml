@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import QtQuick.Controls
 import Quickshell.Io
 import qs.Common
 import qs.Services
@@ -15,8 +14,8 @@ PluginComponent {
 
     property bool isPopoutOpen: false
 
-    popoutWidth: Theme.spacingXL * 10
-    popoutHeight: Theme.spacingXL * 13
+    popoutWidth: 340
+    popoutHeight: 418
 
     readonly property string contribScriptPath: Qt.resolvedUrl("./scripts/fetch-contributions.sh").toString().replace(/^file:\/\//, "")
     readonly property string ghScriptPath: Qt.resolvedUrl("./scripts/fetch-github-data.sh").toString().replace(/^file:\/\//, "")
@@ -530,7 +529,7 @@ PluginComponent {
                     displayName: root.displayName
                     statusText: root.isError
                                 ? root.errorMessage
-                                : (root.isLoading ? I18n.tr("Syncing...") : (root.totalContributions + " " + I18n.tr("contributions") + (root.lastSyncTimeStr ? " · " + root.lastSyncTimeStr : "")))
+                                : (root.isLoading ? "同步中..." : (root.totalContributions + " 次贡献" + (root.lastSyncTimeStr ? " · " + root.lastSyncTimeStr : "")))
                     isLoading: root.isLoading
                     isError: root.isError
                     lastSyncTime: root.lastSyncTimeStr
