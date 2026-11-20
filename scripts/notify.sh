@@ -9,22 +9,25 @@ URGENCY="${3:-normal}"
 
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dms-githubhub"
 AVATAR="$CACHE_DIR/avatar.png"
+ICON_PNG="$DIR/../assets/icon.png"
 GITHUB_SVG="$DIR/../assets/github.svg"
 
-# Priority 1: User GitHub Avatar (from cache); Priority 2: GitHub SVG Icon; Priority 3: System 'github' Icon
+APP_ICON="$GITHUB_SVG"
+if [ -s "$ICON_PNG" ]; then
+    APP_ICON="$ICON_PNG"
+fi
+
 if [ -s "$AVATAR" ]; then
-    ICON="$AVATAR"
-elif [ -s "$GITHUB_SVG" ]; then
-    ICON="$GITHUB_SVG"
+    CONTENT_IMG="$AVATAR"
 else
-    ICON="github"
+    CONTENT_IMG="$APP_ICON"
 fi
 
 if command -v dms >/dev/null 2>&1; then
     dms notify \
         -a "GitHub Hub" \
-        -n "github" \
-        -i "$ICON" \
+        -n "$APP_ICON" \
+        -i "$CONTENT_IMG" \
         -u "$URGENCY" \
         -t 4000 \
         "$TITLE" \
@@ -32,7 +35,7 @@ if command -v dms >/dev/null 2>&1; then
 elif command -v notify-send >/dev/null 2>&1; then
     notify-send \
         -a "GitHub Hub" \
-        -i "$ICON" \
+        -i "$APP_ICON" \
         -u "$URGENCY" \
         -t 4000 \
         -h string:x-canonical-private-synchronous:github-hub-sync \

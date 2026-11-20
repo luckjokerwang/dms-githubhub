@@ -93,7 +93,7 @@ StyledRect {
         // User info column (clickable to toggle GitHub username / nickname)
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 2
+            spacing: Theme.spacingXXS
 
             // Clickable name container covering the exact label + icon area
             Item {

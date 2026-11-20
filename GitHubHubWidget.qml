@@ -13,26 +13,21 @@ import "./components"
 PluginComponent {
     id: root
 
-    // Popout state tracking
     property bool isPopoutOpen: false
 
-    // Popout dimensions
-    popoutWidth: 320
-    popoutHeight: 418
+    popoutWidth: Theme.spacingXL * 10
+    popoutHeight: Theme.spacingXL * 13
 
-    // Script paths
     readonly property string contribScriptPath: Qt.resolvedUrl("./scripts/fetch-contributions.sh").toString().replace(/^file:\/\//, "")
     readonly property string ghScriptPath: Qt.resolvedUrl("./scripts/fetch-github-data.sh").toString().replace(/^file:\/\//, "")
     readonly property string notifyScriptPath: Qt.resolvedUrl("./scripts/notify.sh").toString().replace(/^file:\/\//, "")
 
-    // Settings
     property string configuredUsername: (pluginData && pluginData.username) ? pluginData.username : ""
     property int refreshInterval: (pluginData && pluginData.refreshInterval) ? pluginData.refreshInterval : 300
     property bool showDesktopNotifications: (pluginData && pluginData.showNotifications !== undefined)
                                            ? (pluginData.showNotifications !== false && pluginData.showNotifications !== "false")
                                            : true
 
-    // Theme-derived level-to-color mapping
     function levelToColor(level) {
         const lvl = Math.max(0, Math.min(4, Math.round(level || 0)))
         if (lvl === 0) {
@@ -42,14 +37,12 @@ PluginComponent {
         return Theme.withAlpha(Theme.primary, steps[lvl - 1])
     }
 
-    // State - User & Auth (Zero hardcoded names, clean fallbacks)
     property bool isAuthenticated: false
     property string effectiveUsername: configuredUsername || (ghData && ghData.user && ghData.user.login) || ""
     property string avatarUrl: (ghData && ghData.user && ghData.user.avatar_url) ? ghData.user.avatar_url : ""
     property string cachedAvatarPath: (ghData && ghData.user && ghData.user.avatar_cache) ? ghData.user.avatar_cache : ""
     property string displayName: (ghData && ghData.user && ghData.user.name) ? ghData.user.name : effectiveUsername
 
-    // State - Heatmap (Raw & Mapped)
     property var rawContributions: []
     property var rawGridData: []
     property var contributions: []
@@ -121,16 +114,13 @@ PluginComponent {
         issues: []
     })
 
-    // Actionable urgent alerts (Review Requested PRs)
     readonly property bool hasActionableAlert: {
         if (!ghData) return false
         return !!(ghData.review_requested && ghData.review_requested.length > 0)
     }
 
-    // Navigation
     property int activeTab: 0
 
-    // Loading & Error & Sync
     property bool isLoading: false
     property bool isError: false
     property string errorMessage: ""
@@ -425,13 +415,12 @@ PluginComponent {
                 }
             }
 
-            // High-priority urgent alert static dot (Theme.warning on Review Requested)
             Rectangle {
                 id: alertDot
                 visible: root.hasActionableAlert
-                width: Theme.spacingXS + 1
+                width: Theme.spacingS
                 height: width
-                radius: width / 2
+                radius: Theme.spacingS / 2
                 color: Theme.warning
                 border.color: Theme.surfaceContainerLowest
                 border.width: 1
@@ -476,13 +465,12 @@ PluginComponent {
                 }
             }
 
-            // High-priority urgent alert static dot (Theme.warning on Review Requested)
             Rectangle {
                 id: vAlertDot
                 visible: root.hasActionableAlert
-                width: Theme.spacingXS + 1
+                width: Theme.spacingS
                 height: width
-                radius: width / 2
+                radius: Theme.spacingS / 2
                 color: Theme.warning
                 border.color: Theme.surfaceContainerLowest
                 border.width: 1

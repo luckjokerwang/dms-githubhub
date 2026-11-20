@@ -18,7 +18,7 @@ Item {
 
     // Centered 8-week grid layout with Theme-derived cell metrics
     readonly property int cellSize: Theme.iconSizeLarge - Theme.spacingXS
-    readonly property int labelWidth: Theme.iconSizeSmall - 2
+    readonly property int labelWidth: Theme.iconSizeSmall - Theme.spacingXXS
     readonly property int labelSpacing: Theme.spacingS
     readonly property int colSpacing: Theme.spacingXS
     readonly property int rowSpacing: Theme.spacingXS
