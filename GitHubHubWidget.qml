@@ -13,6 +13,9 @@ import "./components"
 PluginComponent {
     id: root
 
+    // Popout state tracking
+    property bool isPopoutOpen: false
+
     // Popout dimensions
     popoutWidth: 320
     popoutHeight: 418
@@ -27,7 +30,7 @@ PluginComponent {
     property int refreshInterval: (pluginData && pluginData.refreshInterval) ? pluginData.refreshInterval : 300
     property bool followThemeColor: (pluginData && pluginData.followThemeColor !== undefined)
                                    ? (pluginData.followThemeColor === true || pluginData.followThemeColor === "true")
-                                   : false
+                                   : true
     property bool showDesktopNotifications: (pluginData && pluginData.showNotifications !== undefined)
                                            ? (pluginData.showNotifications !== false && pluginData.showNotifications !== "false")
                                            : true
@@ -144,7 +147,7 @@ PluginComponent {
         issues: []
     })
 
-    // Actionable urgent alerts (Option B: Review Requested PRs only)
+    // Actionable urgent alerts (Review Requested PRs)
     readonly property bool hasActionableAlert: {
         if (!ghData) return false
         return !!(ghData.review_requested && ghData.review_requested.length > 0)
@@ -365,41 +368,20 @@ PluginComponent {
         }
 
         function toggle() {
-            root.triggerPopout()
+            if (typeof root.triggerPopout === "function") {
+                root.triggerPopout()
+            }
         }
 
         function open() {
-            if (!root.isPopoutOpen) {
+            if (!root.isPopoutOpen && typeof root.triggerPopout === "function") {
                 root.triggerPopout()
             }
         }
 
         function close() {
-            if (root.isPopoutOpen) {
-                root.closePopout()
-            }
-        }
-    }
-
-    IpcHandler {
-        target: "githubHubLocal"
-
-        function refresh() {
-            root.triggerManualRefresh()
-        }
-
-        function toggle() {
-            root.triggerPopout()
-        }
-
-        function open() {
-            if (!root.isPopoutOpen) {
-                root.triggerPopout()
-            }
-        }
-
-        function close() {
-            if (root.isPopoutOpen) {
+            root.isPopoutOpen = false
+            if (typeof root.closePopout === "function") {
                 root.closePopout()
             }
         }
@@ -437,7 +419,7 @@ PluginComponent {
         notifyProcess.running = true
     }
 
-    // --- Horizontal Bar Pill (Classic 7-day Green Vertical Bars + Option B Static Alert Dot) ---
+    // --- Horizontal Bar Pill (7-day Contribution Bars + Alert Dot) ---
     horizontalBarPill: Component {
         Item {
             implicitWidth: pillRow.implicitWidth
@@ -469,7 +451,7 @@ PluginComponent {
                 }
             }
 
-            // High-priority urgent alert static dot (Option B: Theme.warning dot on Review Requested)
+            // High-priority urgent alert static dot (Theme.warning on Review Requested)
             Rectangle {
                 id: alertDot
                 visible: root.hasActionableAlert
@@ -488,7 +470,7 @@ PluginComponent {
         }
     }
 
-    // --- Vertical Bar Pill (Classic 7-day Green Bars + Option B Static Alert Dot) ---
+    // --- Vertical Bar Pill (7-day Contribution Bars + Alert Dot) ---
     verticalBarPill: Component {
         Item {
             implicitWidth: pillCol.implicitWidth
@@ -520,7 +502,7 @@ PluginComponent {
                 }
             }
 
-            // High-priority urgent alert static dot (Option B: Theme.warning dot on Review Requested)
+            // High-priority urgent alert static dot (Theme.warning on Review Requested)
             Rectangle {
                 id: vAlertDot
                 visible: root.hasActionableAlert
@@ -545,6 +527,9 @@ PluginComponent {
             id: popoutContainer
             showCloseButton: false
             headerText: ""
+
+            Component.onCompleted: root.isPopoutOpen = true
+            Component.onDestruction: root.isPopoutOpen = false
 
             Shortcut {
                 sequence: "F5"
@@ -579,9 +564,6 @@ PluginComponent {
                         if (root.effectiveUsername) {
                             root.openUrl("https://github.com/" + root.effectiveUsername)
                         }
-                    }
-                    onOpenSettingsClicked: {
-                        PluginService.openPluginSettings("githubHub")
                     }
                 }
 

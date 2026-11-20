@@ -40,7 +40,7 @@ PluginSettings {
         const savedUsername = PluginService.loadPluginData(root.pluginId, "username", "")
         const savedInterval = PluginService.loadPluginData(root.pluginId, "refreshInterval", 300)
         const savedNickname = PluginService.loadPluginData(root.pluginId, "showNickname", true)
-        const savedFollowTheme = PluginService.loadPluginData(root.pluginId, "followThemeColor", false)
+        const savedFollowTheme = PluginService.loadPluginData(root.pluginId, "followThemeColor", true)
         const savedNotify = PluginService.loadPluginData(root.pluginId, "showNotifications", true)
 
         if (savedUsername) {
@@ -52,7 +52,7 @@ PluginSettings {
         PluginService.setGlobalVar(root.pluginId, "refreshInterval", savedInterval)
 
         nicknameToggle.checked = (savedNickname !== false && savedNickname !== "false")
-        followThemeToggle.checked = (savedFollowTheme === true || savedFollowTheme === "true")
+        followThemeToggle.checked = (savedFollowTheme !== false && savedFollowTheme !== "false")
         notifyToggle.checked = (savedNotify !== false && savedNotify !== "false")
     }
 
@@ -268,7 +268,7 @@ PluginSettings {
 
                     DToggle {
                         id: followThemeToggle
-                        checked: false
+                        checked: true
                         onClicked: checked = !checked
                     }
                 }
@@ -346,7 +346,7 @@ PluginSettings {
 
                 StyledText {
                     width: parent.width
-                    text: "• 全局快捷键：Mod + Alt + G（系统任意界面一键刷新并验证 GitHub 连通性）\n• 弹窗快捷键：F5 或 Ctrl + R（打开热力图弹窗时直接刷新）\n• 网络可用性反馈：刷新后在屏幕右上角弹出系统桌面通知（支持通知中心归档与随时回看）"
+                    text: "• 弹窗快捷键：F5 或 Ctrl + R（打开热力图弹窗时直接刷新）\n• IPC 命令行刷新：dms ipc call githubHub refresh（可自行绑定到窗口管理器快捷键）\n• 网络可用性反馈：刷新后在屏幕右上角弹出系统桌面通知（支持通知中心归档与随时回看）"
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceVariantText
                     wrapMode: Text.WordWrap

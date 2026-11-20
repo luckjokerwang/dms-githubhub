@@ -15,12 +15,12 @@ Item {
     width: parent.width
     implicitHeight: gridRow.implicitHeight
 
-    // Sized to 28x28 square as requested, centered horizontally
+    // 28x28 square cells, centered horizontally
     readonly property int cellSize: 28
     readonly property int labelWidth: 14
-    readonly property int labelSpacing: 6
-    readonly property int colSpacing: 3
-    readonly property int rowSpacing: 3
+    readonly property int labelSpacing: Theme.spacingS
+    readonly property int colSpacing: Theme.spacingXS
+    readonly property int rowSpacing: Theme.spacingXS
 
     Row {
         id: gridRow
@@ -70,7 +70,7 @@ Item {
                             width: root.cellSize
                             height: root.cellSize
                             // Smooth rounded square
-                            radius: root.selectedDay === modelData ? 6 : 4
+                            radius: root.selectedDay === modelData ? Theme.cornerRadius : (Theme.cornerRadius / 2)
                             color: modelData.color || Theme.surfaceContainerHigh
                             border.color: root.selectedDay === modelData ? Theme.primary : Qt.darker(color, 1.15)
                             border.width: root.selectedDay === modelData ? 2 : 1
@@ -106,14 +106,14 @@ Item {
                                 visible: cellMouseArea.containsMouse && modelData && modelData.date && modelData.date !== "--/--"
                                 z: 999
                                 anchors.bottom: parent.top
-                                anchors.bottomMargin: 4
+                                anchors.bottomMargin: Theme.spacingXS
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                width: tooltipText.implicitWidth + 12
-                                height: tooltipText.implicitHeight + 6
+                                width: tooltipText.implicitWidth + Theme.spacingM
+                                height: tooltipText.implicitHeight + Theme.spacingS
                                 color: Theme.surfaceContainerHighest
                                 border.color: Theme.withAlpha(Theme.outlineVariant, 0.4)
                                 border.width: 1
-                                radius: 4
+                                radius: Theme.cornerRadius / 2
 
                                 StyledText {
                                     id: tooltipText

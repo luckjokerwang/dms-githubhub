@@ -38,7 +38,7 @@ mkdir -p "$cache_dir"
 avatar_cache="$cache_dir/avatar.png"
 avatar_url=$(jq -r '.avatar_url // ""' "$tmp_dir/user.json" 2>/dev/null || true)
 if [ -n "$avatar_url" ]; then
-    ( curl -s -m 5 "$avatar_url" -o "$avatar_cache" 2>/dev/null || true ) &
+    ( dms dl "$avatar_url" -o "$avatar_cache" >/dev/null 2>&1 || curl -s -m 5 "$avatar_url" -o "$avatar_cache" >/dev/null 2>&1 || true ) &
 fi
 
 jq -c -n \

@@ -22,7 +22,6 @@ StyledRect {
 
     signal refreshClicked()
     signal openProfileClicked()
-    signal openSettingsClicked()
 
     Component.onCompleted: {
         const savedShowNickname = PluginService.loadPluginData("githubHub", "showNickname", true)
@@ -84,12 +83,10 @@ StyledRect {
                 id: profileHover
                 anchors.fill: parent
                 hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
+                cursorShape: root.username ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onClicked: {
                     if (root.username) {
                         root.openProfileClicked()
-                    } else {
-                        root.openSettingsClicked()
                     }
                 }
             }
@@ -120,7 +117,7 @@ StyledRect {
                         }
                         font.weight: Font.DemiBold
                         font.pixelSize: Theme.fontSizeMedium + 1
-                        color: nameMouseArea.containsMouse ? Theme.primary : Theme.surfaceText
+                        color: (nameMouseArea.containsMouse && root.username) ? Theme.primary : Theme.surfaceText
                         elide: Text.ElideRight
 
                         Behavior on color { ColorAnimation { duration: 150 } }
@@ -142,10 +139,9 @@ StyledRect {
                     id: nameMouseArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
+                    cursorShape: root.username ? Qt.PointingHandCursor : Qt.ArrowCursor
                     onClicked: {
                         if (!root.username) {
-                            root.openSettingsClicked()
                             return
                         }
                         root.showNickname = !root.showNickname
@@ -246,19 +242,19 @@ StyledRect {
                 visible: refreshArea.containsMouse && !root.isLoading
                 z: 999
                 anchors.bottom: parent.top
-                anchors.bottomMargin: 6
+                anchors.bottomMargin: Theme.spacingXS
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: tooltipText.implicitWidth + 12
-                height: tooltipText.implicitHeight + 6
+                width: tooltipText.implicitWidth + Theme.spacingM
+                height: tooltipText.implicitHeight + Theme.spacingS
                 color: Theme.surfaceContainerHighest
                 border.color: Theme.withAlpha(Theme.outlineVariant, 0.4)
                 border.width: 1
-                radius: 4
+                radius: Theme.cornerRadius / 2
 
                 StyledText {
                     id: tooltipText
                     anchors.centerIn: parent
-                    text: "刷新验证 (F5 / Mod+Alt+G)"
+                    text: "刷新数据 (F5 / Ctrl+R)"
                     font.pixelSize: Theme.fontSizeSmall - 2
                     font.weight: Font.Medium
                     color: Theme.surfaceText
