@@ -50,15 +50,15 @@ Item {
         visible: root.prsList && root.prsList.length > 0
         anchors.fill: parent
         clip: true
-        spacing: 6
+        spacing: Theme.spacingS
         model: root.prsList
 
         delegate: Rectangle {
             id: prItem
             width: listView.width
             // Adaptive height based on text lines, with defensive clipping
-            height: Math.max(68, itemRowLayout.implicitHeight + 16)
-            radius: Theme.cornerRadius - 2
+            height: Math.max(64, itemRowLayout.implicitHeight + Theme.spacingL)
+            radius: Theme.cornerRadius - Theme.spacingXXS
             color: itemHover.containsMouse ? Theme.surfaceContainer : Theme.withAlpha(Theme.surfaceContainerLow, 0.9)
             border.width: (prItem.modelData && prItem.modelData.isReviewRequested) ? 1 : 0
             border.color: (prItem.modelData && prItem.modelData.isReviewRequested) ? Theme.primary : "transparent"
@@ -72,21 +72,21 @@ Item {
             RowLayout {
                 id: itemRowLayout
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 8
+                anchors.margins: Theme.spacingS
+                spacing: Theme.spacingS
 
                 // PR icon
                 Rectangle {
-                    Layout.preferredWidth: 32
-                    Layout.preferredHeight: 32
-                    radius: 16
+                    Layout.preferredWidth: Theme.iconSizeLarge
+                    Layout.preferredHeight: Layout.preferredWidth
+                    radius: Layout.preferredWidth / 2
                     color: Theme.surfaceContainerLowest
                     Layout.alignment: Qt.AlignVCenter
 
                     DIcon {
                         anchors.centerIn: parent
                         name: "call_merge"
-                        size: 16
+                        size: Theme.iconSizeSmall
                         color: Theme.primary
                     }
                 }
@@ -95,16 +95,16 @@ Item {
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
-                    spacing: 2
+                    spacing: Theme.spacingXXS
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: Theme.spacingXS
 
                         StyledText {
                             Layout.fillWidth: true
                             text: (prItem.modelData.repo || "") + (prItem.modelData.number ? (" #" + prItem.modelData.number) : "")
-                            font.pixelSize: Theme.fontSizeSmall - 2
+                            font.pixelSize: Theme.fontSizeXSmall
                             color: Theme.primary
                             elide: Text.ElideRight
                         }
@@ -126,7 +126,7 @@ Item {
 
                                 StyledText {
                                     text: I18n.tr("Review Requested")
-                                    font.pixelSize: Theme.fontSizeSmall - 2
+                                    font.pixelSize: Theme.fontSizeXSmall
                                     font.bold: true
                                     color: Theme.primary
                                     anchors.verticalCenter: parent.verticalCenter

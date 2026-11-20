@@ -401,16 +401,16 @@ PluginComponent {
 
             Row {
                 id: pillRow
-                spacing: 2
+                spacing: Theme.spacingXXS
                 anchors.verticalCenter: parent.verticalCenter
 
                 Repeater {
                     model: 7
 
                     Rectangle {
-                        width: 8
-                        height: 16
-                        radius: 2
+                        width: Theme.spacingS
+                        height: Theme.iconSizeSmall
+                        radius: Theme.cornerRadiusXS
                         color: (index < root.contributions.length && root.contributions[index].color)
                                ? root.contributions[index].color
                                : Theme.surfaceContainerHigh
@@ -429,16 +429,16 @@ PluginComponent {
             Rectangle {
                 id: alertDot
                 visible: root.hasActionableAlert
-                width: 5
-                height: 5
-                radius: 2.5
+                width: Theme.spacingXS + 1
+                height: width
+                radius: width / 2
                 color: Theme.warning
                 border.color: Theme.surfaceContainerLowest
                 border.width: 1
                 anchors.top: pillRow.top
                 anchors.right: pillRow.right
-                anchors.topMargin: -2
-                anchors.rightMargin: -2
+                anchors.topMargin: -Theme.spacingXXS
+                anchors.rightMargin: -Theme.spacingXXS
                 z: 10
             }
         }
@@ -452,16 +452,16 @@ PluginComponent {
 
             Column {
                 id: pillCol
-                spacing: 2
+                spacing: Theme.spacingXXS
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 Repeater {
                     model: 7
 
                     Rectangle {
-                        width: 16
-                        height: 8
-                        radius: 2
+                        width: Theme.iconSizeSmall
+                        height: Theme.spacingS
+                        radius: Theme.cornerRadiusXS
                         color: (index < root.contributions.length && root.contributions[index].color)
                                ? root.contributions[index].color
                                : Theme.surfaceContainerHigh
@@ -480,16 +480,16 @@ PluginComponent {
             Rectangle {
                 id: vAlertDot
                 visible: root.hasActionableAlert
-                width: 5
-                height: 5
-                radius: 2.5
+                width: Theme.spacingXS + 1
+                height: width
+                radius: width / 2
                 color: Theme.warning
                 border.color: Theme.surfaceContainerLowest
                 border.width: 1
                 anchors.top: pillCol.top
                 anchors.right: pillCol.right
-                anchors.topMargin: -2
-                anchors.rightMargin: -2
+                anchors.topMargin: -Theme.spacingXXS
+                anchors.rightMargin: -Theme.spacingXXS
                 z: 10
             }
         }

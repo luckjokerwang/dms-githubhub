@@ -22,7 +22,8 @@ StyledRect {
     readonly property color currentColor: selectedDay ? (selectedDay.color || defaultColor) : defaultColor
 
     width: parent.width
-    height: 72
+    implicitHeight: cardRow.implicitHeight + Theme.spacingM * 2
+    height: implicitHeight
     radius: Theme.cornerRadius
     // Softer, deeper background color
     color: Theme.withAlpha(Theme.surfaceContainerLow, 0.9)
@@ -32,6 +33,7 @@ StyledRect {
     Behavior on border.color { ColorAnimation { duration: 150 } }
 
     RowLayout {
+        id: cardRow
         anchors.fill: parent
         anchors.margins: Theme.spacingM
         spacing: Theme.spacingM
@@ -61,7 +63,7 @@ StyledRect {
 
                 StyledText {
                     text: root.currentCount.toString()
-                    font.pixelSize: Theme.fontSizeXLarge * 1.4
+                    font.pixelSize: Theme.fontSizeXXLarge
                     font.bold: true
                     color: Theme.surfaceText
                     anchors.verticalCenter: parent.verticalCenter
@@ -70,7 +72,7 @@ StyledRect {
 
             StyledText {
                 text: I18n.tr("contributions")
-                font.pixelSize: Theme.fontSizeSmall - 2
+                font.pixelSize: Theme.fontSizeXSmall
                 color: Theme.surfaceVariantText
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -119,7 +121,7 @@ StyledRect {
                         id: todayBadgeText
                         anchors.centerIn: parent
                         text: I18n.tr("Today")
-                        font.pixelSize: Theme.fontSizeSmall - 2
+                        font.pixelSize: Theme.fontSizeXSmall
                         font.weight: Font.Bold
                         color: Theme.primary
                     }

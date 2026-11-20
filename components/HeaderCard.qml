@@ -29,13 +29,15 @@ StyledRect {
     }
 
     width: parent.width
-    height: 72
+    implicitHeight: cardRow.implicitHeight + Theme.spacingM * 2
+    height: implicitHeight
     radius: Theme.cornerRadius
     // Softer, deeper background color
     color: Theme.withAlpha(Theme.surfaceContainerLow, 0.9)
     border.width: 0
 
     RowLayout {
+        id: cardRow
         anchors.fill: parent
         anchors.margins: Theme.spacingM
         spacing: Theme.spacingM
@@ -66,13 +68,12 @@ StyledRect {
                 }
             }
 
-            // Fallback: Official GitHub Octocat SVG icon
-            Image {
+            // Fallback: Code icon that automatically adapts to dark/light theme
+            DIcon {
                 anchors.centerIn: parent
-                width: Theme.iconSize
-                height: Theme.iconSize
-                source: Qt.resolvedUrl("../assets/github.svg")
-                fillMode: Image.PreserveAspectFit
+                size: Theme.iconSize
+                name: "code"
+                color: Theme.surfaceVariantText
                 visible: !avatarImg.visible
             }
 
@@ -113,7 +114,7 @@ StyledRect {
                             return root.showNickname ? (root.displayName || root.username) : root.username
                         }
                         font.weight: Font.DemiBold
-                        font.pixelSize: Theme.fontSizeMedium + 1
+                        font.pixelSize: Theme.fontSizeLarge
                         color: (nameMouseArea.containsMouse && root.username) ? Theme.primary : Theme.surfaceText
                         elide: Text.ElideRight
 
@@ -177,7 +178,7 @@ StyledRect {
                         }
                         return root.statusText
                     }
-                    font.pixelSize: Theme.fontSizeSmall - 1
+                    font.pixelSize: Theme.fontSizeSmall
                     color: root.isError ? Theme.error : (root.isLoading ? Theme.primary : Theme.surfaceVariantText)
                     elide: Text.ElideRight
                     wrapMode: Text.NoWrap

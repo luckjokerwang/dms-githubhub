@@ -23,6 +23,7 @@ fi
 if command -v dms >/dev/null 2>&1; then
     dms notify \
         -a "GitHub Hub" \
+        -n "github" \
         -i "$ICON" \
         -u "$URGENCY" \
         -t 4000 \

@@ -39,7 +39,7 @@ Item {
 
                 StyledText {
                     text: modelData
-                    font.pixelSize: Theme.fontSizeSmall - 2
+                    font.pixelSize: Theme.fontSizeXSmall
                     color: Theme.surfaceVariantText
                     width: root.labelWidth
                     height: root.cellSize

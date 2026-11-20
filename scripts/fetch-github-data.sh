@@ -37,7 +37,7 @@ cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/dms-githubhub"
 mkdir -p "$cache_dir"
 avatar_cache="$cache_dir/avatar.png"
 avatar_url=$(jq -r '.avatar_url // ""' "$tmp_dir/user.json" 2>/dev/null || true)
-if [ -n "$avatar_url" ]; then
+if [ -n "$avatar_url" ] && [ ! -s "$avatar_cache" ]; then
     ( dms dl "$avatar_url" -o "$avatar_cache" >/dev/null 2>&1 || curl -s -m 5 "$avatar_url" -o "$avatar_cache" >/dev/null 2>&1 || true ) &
 fi
 
