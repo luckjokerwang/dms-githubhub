@@ -23,9 +23,9 @@ Item {
         equalWidthTabs: true
         currentIndex: root.activeTab
         model: [
-            { text: "热力图", icon: "grid_view" },
-            { text: "PR" + (root.prCount > 0 ? " (" + root.prCount + ")" : ""), icon: "call_merge" },
-            { text: "议题" + (root.issueCount > 0 ? " (" + root.issueCount + ")" : ""), icon: "bug_report" }
+            { text: I18n.tr("Heatmap"), icon: "grid_view" },
+            { text: I18n.tr("PR") + (root.prCount > 0 ? " (" + root.prCount + ")" : ""), icon: "call_merge" },
+            { text: I18n.tr("Issues") + (root.issueCount > 0 ? " (" + root.issueCount + ")" : ""), icon: "bug_report" }
         ]
         onTabClicked: index => {
             root.activeTab = index

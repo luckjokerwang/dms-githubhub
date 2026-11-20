@@ -28,34 +28,15 @@ PluginComponent {
     // Settings
     property string configuredUsername: (pluginData && pluginData.username) ? pluginData.username : ""
     property int refreshInterval: (pluginData && pluginData.refreshInterval) ? pluginData.refreshInterval : 300
-    property bool followThemeColor: (pluginData && pluginData.followThemeColor !== undefined)
-                                   ? (pluginData.followThemeColor === true || pluginData.followThemeColor === "true")
-                                   : true
     property bool showDesktopNotifications: (pluginData && pluginData.showNotifications !== undefined)
                                            ? (pluginData.showNotifications !== false && pluginData.showNotifications !== "false")
                                            : true
 
-    // Color palettes & Dynamic level-to-color mapping
-    readonly property var classicPalette: ["", "#0e4429", "#006d32", "#26a641", "#39d353"]
-
-    function colorToLevel(colorStr) {
-        if (!colorStr) return 0
-        switch (colorStr.toLowerCase()) {
-            case "#0e4429": return 1
-            case "#006d32": return 2
-            case "#26a641": return 3
-            case "#39d353": return 4
-            default: return 0
-        }
-    }
-
+    // Theme-derived level-to-color mapping
     function levelToColor(level) {
         const lvl = Math.max(0, Math.min(4, Math.round(level || 0)))
         if (lvl === 0) {
             return Theme.surfaceContainerHigh
-        }
-        if (!root.followThemeColor) {
-            return root.classicPalette[lvl]
         }
         const steps = [0.30, 0.55, 0.80, 1.0]
         return Theme.withAlpha(Theme.primary, steps[lvl - 1])
@@ -82,7 +63,7 @@ PluginComponent {
             const mappedContribs = []
             for (let i = 0; i < rawContributions.length; i++) {
                 const item = rawContributions[i]
-                const lvl = (item.level !== undefined) ? item.level : root.colorToLevel(item.color)
+                const lvl = (item.level !== undefined) ? item.level : 0
                 const c = item.date === "--/--" ? root.levelToColor(0) : root.levelToColor(lvl)
                 mappedContribs.push(Object.assign({}, item, {
                     color: c,
@@ -102,7 +83,7 @@ PluginComponent {
                 const mappedWeek = []
                 for (let d = 0; d < weekArr.length; d++) {
                     const item = weekArr[d]
-                    const lvl = (item.level !== undefined) ? item.level : root.colorToLevel(item.color)
+                    const lvl = (item.level !== undefined) ? item.level : 0
                     const c = item.date === "--/--" ? root.levelToColor(0) : root.levelToColor(lvl)
                     mappedWeek.push(Object.assign({}, item, {
                         color: c,
@@ -115,23 +96,16 @@ PluginComponent {
         }
 
         if (root.selectedDay) {
-            const selLvl = (root.selectedDay.level !== undefined) ? root.selectedDay.level : root.colorToLevel(root.selectedDay.color)
+            const selLvl = (root.selectedDay.level !== undefined) ? root.selectedDay.level : 0
             const selColor = root.levelToColor(selLvl)
             root.selectedDay = Object.assign({}, root.selectedDay, { color: selColor, level: selLvl })
         }
     }
 
-    onFollowThemeColorChanged: {
-        updateColors()
-    }
-
     Connections {
         target: Theme
         function onPrimaryChanged() {
-            if (root.followThemeColor) root.updateColors()
-        }
-        function onSurfaceTextChanged() {
-            if (root.followThemeColor) root.updateColors()
+            root.updateColors()
         }
         function onSurfaceContainerHighChanged() {
             root.updateColors()
@@ -227,7 +201,7 @@ PluginComponent {
 
     function triggerManualRefresh() {
         root.isManualRefresh = true
-        root.sendDesktopNotification("正在验证 GitHub 连接...", "正在向 GitHub 发送请求以测试网络可用性...", "low")
+        root.sendDesktopNotification(I18n.tr("Checking GitHub connection..."), I18n.tr("Sending request to test connectivity..."), "low")
         root.refreshAll(true)
     }
 
@@ -263,11 +237,11 @@ PluginComponent {
             if (root.isManualRefresh) {
                 root.isManualRefresh = false
                 if (root.isError) {
-                    root.sendDesktopNotification("GitHub Hub · 同步失败", "连接失败 (" + (root.errorMessage || "网络超时或代理断开") + ")", "critical")
+                    root.sendDesktopNotification(I18n.tr("GitHub Hub · Sync Failed"), I18n.tr("Connection failed: %1").arg(root.errorMessage || I18n.tr("Network timeout")), "critical")
                 } else {
                     const time = Qt.formatTime(new Date(), "hh:mm:ss")
                     root.lastSyncTimeStr = time
-                    root.sendDesktopNotification("GitHub Hub · 已同步", "网络连接正常，近 8 周累计 " + root.totalContributions + " 次贡献", "normal")
+                    root.sendDesktopNotification(I18n.tr("GitHub Hub · Synced"), I18n.tr("Connected. %1 contributions in the last 8 weeks").arg(root.totalContributions), "normal")
                 }
             } else if (!root.isError) {
                 root.lastSyncTimeStr = Qt.formatTime(new Date(), "hh:mm")
@@ -319,7 +293,7 @@ PluginComponent {
         onExited: (code, status) => {
             if (code !== 0 && !root.isError) {
                 root.isError = true
-                root.errorMessage = "网络连接超时或命令执行失败"
+                root.errorMessage = I18n.tr("Network timeout or command failed")
             }
             root.checkProcessesDone()
         }
@@ -554,7 +528,7 @@ PluginComponent {
                     displayName: root.displayName
                     statusText: root.isError
                                 ? root.errorMessage
-                                : (root.isLoading ? "同步验证中..." : root.totalContributions + " 次贡献" + (root.lastSyncTimeStr ? " · " + root.lastSyncTimeStr : ""))
+                                : (root.isLoading ? I18n.tr("Syncing...") : (root.totalContributions + " " + I18n.tr("contributions") + (root.lastSyncTimeStr ? " · " + root.lastSyncTimeStr : "")))
                     isLoading: root.isLoading
                     isError: root.isError
                     lastSyncTime: root.lastSyncTimeStr
@@ -602,8 +576,8 @@ PluginComponent {
 
                         DetailCard {
                             selectedDay: root.selectedDay
-                            defaultWeekday: (root.todayItem && root.todayItem.weekdayName) ? root.todayItem.weekdayName : "今日"
-                            defaultDate: (root.todayItem && root.todayItem.formattedDate) ? root.todayItem.formattedDate : "Today"
+                            defaultWeekday: (root.todayItem && root.todayItem.weekdayName) ? root.todayItem.weekdayName : I18n.tr("Today")
+                            defaultDate: (root.todayItem && root.todayItem.formattedDate) ? root.todayItem.formattedDate : I18n.tr("Today")
                             defaultCount: (root.todayItem && root.todayItem.count !== undefined) ? root.todayItem.count : 0
                             defaultColor: (root.todayItem && root.todayItem.color) ? root.todayItem.color : Theme.surfaceContainerHigh
                         }

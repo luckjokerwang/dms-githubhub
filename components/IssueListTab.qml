@@ -30,13 +30,13 @@ Item {
             DIcon {
                 Layout.alignment: Qt.AlignHCenter
                 name: "check_circle"
-                size: 36
+                size: Theme.iconSizeLarge
                 color: Theme.primary
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: "太棒了！暂无未结的议题"
+                text: I18n.tr("No open issues")
                 font.bold: true
                 font.pixelSize: Theme.fontSizeMedium
                 color: Theme.surfaceText
@@ -119,15 +119,15 @@ Item {
                 // Open in browser button
                 Rectangle {
                     Layout.alignment: Qt.AlignVCenter
-                    width: 28
-                    height: 28
-                    radius: Theme.cornerRadius - 4
+                    width: Theme.iconSizeLarge - Theme.spacingXS
+                    height: width
+                    radius: Theme.cornerRadiusXS
                     color: openHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
 
                     DIcon {
                         anchors.centerIn: parent
                         name: "open_in_new"
-                        size: 14
+                        size: Theme.iconSizeSmall
                         color: openHover.containsMouse ? Theme.primary : Theme.surfaceVariantText
                     }
 

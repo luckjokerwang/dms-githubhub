@@ -30,13 +30,13 @@ Item {
             DIcon {
                 Layout.alignment: Qt.AlignHCenter
                 name: "check_circle"
-                size: 36
+                size: Theme.iconSizeLarge
                 color: Theme.primary
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: "太棒了！暂无待处理的 PR"
+                text: I18n.tr("No open pull requests")
                 font.bold: true
                 font.pixelSize: Theme.fontSizeMedium
                 color: Theme.surfaceText
@@ -112,9 +112,9 @@ Item {
                         // Review Requested pill
                         Rectangle {
                             visible: !!(prItem.modelData && prItem.modelData.isReviewRequested)
-                            Layout.preferredHeight: 16
-                            Layout.preferredWidth: unreadRow.implicitWidth + 8
-                            radius: 3
+                            Layout.preferredHeight: Theme.iconSizeSmall
+                            Layout.preferredWidth: unreadRow.implicitWidth + Theme.spacingS
+                            radius: Theme.cornerRadiusXS
                             color: Theme.withAlpha(Theme.primary, 0.15)
                             border.color: Theme.withAlpha(Theme.primary, 0.5)
                             border.width: 1
@@ -122,10 +122,10 @@ Item {
                             Row {
                                 id: unreadRow
                                 anchors.centerIn: parent
-                                spacing: 3
+                                spacing: Theme.spacingXXS
 
                                 StyledText {
-                                    text: "待审核"
+                                    text: I18n.tr("Review Requested")
                                     font.pixelSize: Theme.fontSizeSmall - 2
                                     font.bold: true
                                     color: Theme.primary
@@ -150,15 +150,15 @@ Item {
                 // Open in browser button
                 Rectangle {
                     Layout.alignment: Qt.AlignVCenter
-                    width: 28
-                    height: 28
-                    radius: Theme.cornerRadius - 4
+                    width: Theme.iconSizeLarge - Theme.spacingXS
+                    height: width
+                    radius: Theme.cornerRadiusXS
                     color: openHover.containsMouse ? Theme.surfaceContainerHighest : "transparent"
 
                     DIcon {
                         anchors.centerIn: parent
                         name: "open_in_new"
-                        size: 14
+                        size: Theme.iconSizeSmall
                         color: openHover.containsMouse ? Theme.primary : Theme.surfaceVariantText
                     }
 

@@ -8,7 +8,7 @@ StyledRect {
     id: root
 
     property var selectedDay: null
-    property string defaultWeekday: "Today"
+    property string defaultWeekday: I18n.tr("Today")
     property string defaultDate: ""
     property int defaultCount: 0
     property color defaultColor: Theme.surfaceContainerHigh
@@ -16,7 +16,7 @@ StyledRect {
     readonly property int currentCount: selectedDay ? selectedDay.count : defaultCount
     readonly property string currentWeekday: selectedDay ? selectedDay.weekdayName : defaultWeekday
     readonly property string currentDate: {
-        if (!selectedDay) return defaultDate || "Today"
+        if (!selectedDay) return defaultDate || I18n.tr("Today")
         return selectedDay.formattedDate || selectedDay.date || ""
     }
     readonly property color currentColor: selectedDay ? (selectedDay.color || defaultColor) : defaultColor
@@ -69,7 +69,7 @@ StyledRect {
             }
 
             StyledText {
-                text: "contributions"
+                text: I18n.tr("contributions")
                 font.pixelSize: Theme.fontSizeSmall - 2
                 color: Theme.surfaceVariantText
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -95,7 +95,7 @@ StyledRect {
 
                 DIcon {
                     name: "commit"
-                    size: 16
+                    size: Theme.iconSizeSmall
                     color: Theme.primary
                 }
 
@@ -108,17 +108,17 @@ StyledRect {
 
                 Rectangle {
                     visible: !root.selectedDay
-                    radius: 3
+                    radius: Theme.cornerRadiusXS
                     color: Theme.withAlpha(Theme.primary, 0.15)
                     border.width: 1
                     border.color: Theme.withAlpha(Theme.primary, 0.3)
-                    implicitWidth: todayBadgeText.implicitWidth + 8
-                    implicitHeight: todayBadgeText.implicitHeight + 2
+                    implicitWidth: todayBadgeText.implicitWidth + Theme.spacingS
+                    implicitHeight: todayBadgeText.implicitHeight + Theme.spacingXXS
 
                     StyledText {
                         id: todayBadgeText
                         anchors.centerIn: parent
-                        text: "今日"
+                        text: I18n.tr("Today")
                         font.pixelSize: Theme.fontSizeSmall - 2
                         font.weight: Font.Bold
                         color: Theme.primary

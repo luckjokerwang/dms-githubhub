@@ -43,9 +43,9 @@ StyledRect {
         // Avatar container
         Rectangle {
             id: avatarWrapper
-            Layout.preferredWidth: 44
-            Layout.preferredHeight: 44
-            radius: 22
+            Layout.preferredWidth: Theme.iconSizeLarge + Theme.spacingS
+            Layout.preferredHeight: Layout.preferredWidth
+            radius: Layout.preferredWidth / 2
             color: Theme.surfaceContainerLowest
             border.color: profileHover.containsMouse ? Theme.primary : Theme.withAlpha(Theme.outlineVariant, 0.25)
             border.width: 1
@@ -55,25 +55,22 @@ StyledRect {
 
             ClippingRectangle {
                 anchors.fill: parent
-                radius: 22
+                radius: parent.radius
                 color: "transparent"
 
-                Image {
+                CachingImage {
                     id: avatarImg
                     anchors.fill: parent
-                    source: root.avatarUrl ? root.avatarUrl : (root.cachedAvatarPath ? ("file://" + root.cachedAvatarPath) : "")
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    cache: true
-                    visible: status === Image.Ready && (root.avatarUrl !== "" || root.cachedAvatarPath !== "")
+                    imagePath: root.avatarUrl ? root.avatarUrl : (root.cachedAvatarPath ? ("file://" + root.cachedAvatarPath) : "")
+                    visible: (root.avatarUrl !== "" || root.cachedAvatarPath !== "")
                 }
             }
 
             // Fallback: Official GitHub Octocat SVG icon
             Image {
                 anchors.centerIn: parent
-                width: 24
-                height: 24
+                width: Theme.iconSize
+                height: Theme.iconSize
                 source: Qt.resolvedUrl("../assets/github.svg")
                 fillMode: Image.PreserveAspectFit
                 visible: !avatarImg.visible
@@ -104,14 +101,14 @@ StyledRect {
 
                 Row {
                     id: nameRow
-                    spacing: 6
+                    spacing: Theme.spacingS
                     anchors.verticalCenter: parent.verticalCenter
 
                     StyledText {
                         id: nameLabel
                         text: {
                             if (!root.username && !root.displayName) {
-                                return "未设置账号"
+                                return I18n.tr("No account configured")
                             }
                             return root.showNickname ? (root.displayName || root.username) : root.username
                         }
@@ -126,7 +123,7 @@ StyledRect {
                     DIcon {
                         visible: root.username !== ""
                         name: "swap_horiz"
-                        size: 14
+                        size: Theme.iconSizeSmall
                         color: nameMouseArea.containsMouse ? Theme.primary : Theme.surfaceVariantText
                         opacity: nameMouseArea.containsMouse ? 1.0 : 0.5
                         anchors.verticalCenter: parent.verticalCenter
@@ -152,9 +149,9 @@ StyledRect {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Theme.spacingS
 
-                // Network status indicator dot (Primary = normal, Warning = loading, Error = error, outlineVariant = unconfigured)
+                // Network status indicator dot
                 Rectangle {
                     width: 7
                     height: 7
@@ -176,7 +173,7 @@ StyledRect {
                     Layout.fillWidth: true
                     text: {
                         if (!root.username && !root.isLoading && !root.isError) {
-                            return "点击配置用户名或登录 gh CLI"
+                            return I18n.tr("Set username or log in via gh CLI")
                         }
                         return root.statusText
                     }
@@ -191,9 +188,10 @@ StyledRect {
 
         // Action button (Refresh button with tooltip)
         Item {
+            id: refreshBtn
             Layout.alignment: Qt.AlignVCenter
-            width: 38
-            height: 38
+            width: Theme.iconSizeLarge + Theme.spacingXS
+            height: width
             scale: refreshArea.pressed ? 0.92 : (refreshArea.containsMouse ? 1.06 : 1.0)
             Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
 
@@ -214,7 +212,7 @@ StyledRect {
             DIcon {
                 id: refreshIcon
                 name: "refresh"
-                size: 20
+                size: Theme.iconSizeMedium
                 color: Theme.primary
                 anchors.centerIn: parent
 
@@ -236,29 +234,10 @@ StyledRect {
                 onClicked: root.refreshClicked()
             }
 
-            // Refresh tooltip hint
-            Rectangle {
-                id: refreshTooltip
-                visible: refreshArea.containsMouse && !root.isLoading
-                z: 999
-                anchors.bottom: parent.top
-                anchors.bottomMargin: Theme.spacingXS
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: tooltipText.implicitWidth + Theme.spacingM
-                height: tooltipText.implicitHeight + Theme.spacingS
-                color: Theme.surfaceContainerHighest
-                border.color: Theme.withAlpha(Theme.outlineVariant, 0.4)
-                border.width: 1
-                radius: Theme.cornerRadius / 2
-
-                StyledText {
-                    id: tooltipText
-                    anchors.centerIn: parent
-                    text: "刷新数据 (F5 / Ctrl+R)"
-                    font.pixelSize: Theme.fontSizeSmall - 2
-                    font.weight: Font.Medium
-                    color: Theme.surfaceText
-                }
+            DTooltipHost {
+                text: I18n.tr("Refresh data (F5 / Ctrl+R)")
+                target: refreshBtn
+                hoverArea: refreshArea
             }
         }
     }

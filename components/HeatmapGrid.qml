@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
+import qs.DCommon.Widgets
 
 Item {
     id: root
@@ -15,9 +16,9 @@ Item {
     width: parent.width
     implicitHeight: gridRow.implicitHeight
 
-    // 28x28 square cells, centered horizontally
-    readonly property int cellSize: 28
-    readonly property int labelWidth: 14
+    // Centered 8-week grid layout with Theme-derived cell metrics
+    readonly property int cellSize: Theme.iconSizeLarge - Theme.spacingXS
+    readonly property int labelWidth: Theme.iconSizeSmall - 2
     readonly property int labelSpacing: Theme.spacingS
     readonly property int colSpacing: Theme.spacingXS
     readonly property int rowSpacing: Theme.spacingXS
@@ -48,7 +49,7 @@ Item {
             }
         }
 
-        // 8-week Grid (28x28 square cells)
+        // 8-week Grid
         Row {
             spacing: root.colSpacing
 
@@ -69,7 +70,6 @@ Item {
                             id: cellRect
                             width: root.cellSize
                             height: root.cellSize
-                            // Smooth rounded square
                             radius: root.selectedDay === modelData ? Theme.cornerRadius : (Theme.cornerRadius / 2)
                             color: modelData.color || Theme.surfaceContainerHigh
                             border.color: root.selectedDay === modelData ? Theme.primary : Qt.darker(color, 1.15)
@@ -100,29 +100,10 @@ Item {
                                 }
                             }
 
-                            // Tooltip popup on hover
-                            Rectangle {
-                                id: tooltipBadge
-                                visible: cellMouseArea.containsMouse && modelData && modelData.date && modelData.date !== "--/--"
-                                z: 999
-                                anchors.bottom: parent.top
-                                anchors.bottomMargin: Theme.spacingXS
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                width: tooltipText.implicitWidth + Theme.spacingM
-                                height: tooltipText.implicitHeight + Theme.spacingS
-                                color: Theme.surfaceContainerHighest
-                                border.color: Theme.withAlpha(Theme.outlineVariant, 0.4)
-                                border.width: 1
-                                radius: Theme.cornerRadius / 2
-
-                                StyledText {
-                                    id: tooltipText
-                                    anchors.centerIn: parent
-                                    text: (modelData.formattedDate || modelData.date) + ": " + (modelData.count !== undefined ? modelData.count : 0)
-                                    font.pixelSize: Theme.fontSizeSmall - 1
-                                    font.weight: Font.Medium
-                                    color: Theme.surfaceText
-                                }
+                            DTooltipHost {
+                                text: (modelData.formattedDate || modelData.date) + ": " + (modelData.count !== undefined ? modelData.count : 0)
+                                target: cellRect
+                                hoverArea: cellMouseArea
                             }
                         }
                     }
